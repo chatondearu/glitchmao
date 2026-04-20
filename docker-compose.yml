@@ -1,0 +1,41 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.dev
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - web_npm_cache:/root/.npm
+      - web_cargo_cache:/usr/local/cargo/registry
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://glitchmao:glitchmao@postgres:5432/glitchmao
+      GPG_KEY_ID: test@glitchmao.local
+      VERIFICATION_BASE_URL: http://localhost:3000/verify
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: glitchmao
+      POSTGRES_PASSWORD: glitchmao
+      POSTGRES_DB: glitchmao
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./infra/db/migrations/0001_init.sql:/docker-entrypoint-initdb.d/0001_init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glitchmao -d glitchmao"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pg_data:
+  web_npm_cache:
+  web_cargo_cache:

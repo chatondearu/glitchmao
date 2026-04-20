@@ -1,0 +1,29 @@
+FROM node:22-bookworm
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    curl \
+    gnupg \
+    exiftool \
+    postgresql-client \
+    build-essential \
+    pkg-config \
+    libssl-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+ENV RUSTUP_HOME=/usr/local/rustup \
+  CARGO_HOME=/usr/local/cargo \
+  PATH=/usr/local/cargo/bin:${PATH}
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+  | sh -s -- -y --profile minimal --default-toolchain stable
+
+WORKDIR /workspace
+
+COPY package.json ./
+COPY apps/web-nuxt/package.json ./apps/web-nuxt/package.json
+RUN corepack enable || true
+
+EXPOSE 3000
+
+CMD ["bash", "-lc", "npm install --prefix apps/web-nuxt && npm run dev:web -- --host 0.0.0.0 --port 3000"]

@@ -1,0 +1,14 @@
+{
+  "name": "glitchmao",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Universal authenticity toolkit (Rust + Nuxt)",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --prefix apps/web-nuxt run dev",
+    "build:web": "npm --prefix apps/web-nuxt run build",
+    "preview:web": "npm --prefix apps/web-nuxt run preview"
+  }
+}
