@@ -1,6 +1,35 @@
 # GlitchMao
 
-GlitchMao is an open-source authenticity toolkit that links creator identity to digital or physical content using SHA-256 hashing and GPG signatures.
+[![Version](https://img.shields.io/github/v/release/chatondearu/glitchmao?include_prereleases&label=version)](https://github.com/chatondearu/glitchmao/releases)
+[![Release Date](https://img.shields.io/github/release-date/chatondearu/glitchmao?label=released)](https://github.com/chatondearu/glitchmao/releases)
+[![CI](https://github.com/chatondearu/glitchmao/actions/workflows/release.yml/badge.svg)](https://github.com/chatondearu/glitchmao/actions/workflows/release.yml)
+[![License](https://img.shields.io/github/license/chatondearu/glitchmao)](./LICENSE)
+
+GlitchMao is an open-source authenticity toolkit built to make trust portable across the web and beyond.
+It links creator identity to digital or physical content through SHA-256 fingerprints and cryptographic signatures, with a verification flow designed for real-world usage.
+
+**Proof for content. Confidence for people.**
+
+The core ideas behind the project are:
+- creation should stay simple for creators,
+- verification should remain independent for third parties,
+- trust should be auditable over time.
+
+GlitchMao combines a Nuxt web app, a dedicated Rust signer service, and persistent history so signatures are not only generated, but also traceable, reviewable, and reusable.
+
+License: MIT
+
+## Why GlitchMao?
+
+- **Creator-first signing**: produce signatures from text, files, and media workflows without forcing complex crypto steps on end users.
+- **Independent verification**: verify through web links, API, or CLI so trust does not depend on a single interface.
+- **Audit-ready trust trail**: keep signature metadata and key lifecycle history to support long-term traceability.
+
+## Signature flow
+
+```text
+Create content -> Hash (SHA-256) -> Sign (Rust signer + GPG key) -> Store proof -> Verify (ID, hash, or file)
+```
 
 ## Stack
 
