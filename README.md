@@ -6,6 +6,8 @@ GlitchMao is an open-source authenticity toolkit that links creator identity to 
 
 - Rust workspace for hashing/signing engine and CLI.
 - Nuxt 4 for web UI and verification API routes.
+- Reka UI for accessible Vue primitives in the Nuxt app.
+- UnoCSS for utility-first styling in the Nuxt app.
 - PostgreSQL for signature history.
 - Docker and Nix for reproducible development environment.
 
@@ -15,6 +17,7 @@ GlitchMao is an open-source authenticity toolkit that links creator identity to 
 - `crates/cli`: CLI for hash/sign/bundle.
 - `apps/web-nuxt/app`: Nuxt 4 application directory (`app.vue`, `pages/`, etc.).
 - `apps/web-nuxt/server`: Nuxt server directory (`/api/verify`, `/api/signatures`, utils).
+- `apps/web-nuxt/app/components/ui`: shared UI components built on top of Reka UI + UnoCSS.
 - `infra/db/migrations`: SQL migrations.
 - `infra/docker`: development Dockerfile.
 
@@ -42,6 +45,45 @@ GlitchMao is an open-source authenticity toolkit that links creator identity to 
   ```bash
    docker compose up --build
   ```
+
+## Web UI conventions (Nuxt)
+
+- Use `reka-ui` primitives as the base for accessible interactive components.
+- Use UnoCSS utility classes for styling (`@unocss/nuxt` + `uno.config.ts`).
+- Keep reusable UI building blocks under `apps/web-nuxt/app/components/ui`.
+- Prefer typed props (`<script setup lang="ts">`) and explicit emits for UI components.
+- Keep code comments in English and only for non-obvious behavior.
+
+### UI setup references
+
+- Nuxt modules are declared in `apps/web-nuxt/nuxt.config.ts`:
+  - `@unocss/nuxt`
+  - `reka-ui/nuxt`
+- UnoCSS presets are configured in `apps/web-nuxt/uno.config.ts`.
+
+### Design token checklist (UnoCSS)
+
+Use this checklist before introducing or updating UI primitives.
+
+- `colors.brand.*` scale exists in `apps/web-nuxt/uno.config.ts`.
+- Add semantic colors (example: `surface`, `text`, `success`, `warning`, `danger`) mapped to stable hex values.
+- Add spacing tokens beyond defaults only when repeated layout patterns appear (avoid premature customization).
+- Add radius tokens (`sm`, `md`, `lg`, `xl`) and use them consistently across `app/components/ui`.
+- Add typography tokens for app-level consistency (font sizes/line heights for `body`, `label`, `caption`, `title`).
+- Add shadow tokens for elevation levels (`sm`, `md`, `lg`) and limit usage to key interactive surfaces.
+- Add motion tokens (duration/easing) for interactive components (hover, focus, open/close).
+- Define and document interaction state tokens (`hover`, `focus`, `disabled`, `error`) for form controls and buttons.
+- Ensure color contrast is accessible (WCAG AA minimum) for text and actionable controls.
+- Keep token naming semantic and stable; avoid naming by raw color intent like `blue-button`.
+- When a new token is introduced, update this README section and apply it in at least one shared UI component.
+
+Recommended incremental process:
+
+1. Identify repetition in a real component/page.
+2. Introduce the smallest useful token in `uno.config.ts`.
+3. Apply it to shared components under `app/components/ui`.
+4. Validate visual consistency and accessibility.
+5. Document the change in this checklist.
 
 ## Rust CLI usage
 
