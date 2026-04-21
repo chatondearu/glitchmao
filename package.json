@@ -9,6 +9,12 @@
   "scripts": {
     "dev:web": "npm --prefix apps/web-nuxt run dev",
     "build:web": "npm --prefix apps/web-nuxt run build",
-    "preview:web": "npm --prefix apps/web-nuxt run preview"
+    "preview:web": "npm --prefix apps/web-nuxt run preview",
+    "docs:dev": "vitepress dev doc",
+    "docs:build": "vitepress build doc",
+    "docs:preview": "vitepress preview doc"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.4"
   }
 }

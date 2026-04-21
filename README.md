@@ -19,6 +19,8 @@ GlitchMao combines a Nuxt web app, a dedicated Rust signer service, and persiste
 
 License: MIT
 
+Full documentation: [doc/README.md](doc/README.md)
+
 ## Why GlitchMao?
 
 - **Creator-first signing**: produce signatures from text, files, and media workflows without forcing complex crypto steps on end users.
