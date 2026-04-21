@@ -13,5 +13,8 @@ export default defineNuxtConfig({
     databaseUrl: process.env.DATABASE_URL ?? '',
     gpgKeyId: process.env.GPG_KEY_ID ?? '',
     verificationBaseUrl: process.env.VERIFICATION_BASE_URL ?? 'http://localhost:3000/verify',
+    storageProvider: process.env.STORAGE_PROVIDER ?? 'none',
+    storageBucket: process.env.STORAGE_BUCKET ?? '',
+    storageBaseUrl: process.env.STORAGE_BASE_URL ?? '',
   },
 })

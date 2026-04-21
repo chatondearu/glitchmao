@@ -1,12 +1,21 @@
 import { z } from 'zod'
-import { getDbPool } from '../utils/db'
+import { getDb } from '../utils/db'
+import { getCurrentProfile } from '../utils/current-user'
+import { resolveStorageProvider } from '../utils/storage'
+import { signatures } from '../db/schema'
 
 const bodySchema = z.object({
   content_hash: z.string().trim().length(64),
   signature: z.string().trim().min(1),
-  creator_id: z.string().trim().min(1),
+  creator_id: z.string().trim().min(1).optional(),
+  profile_id: z.string().uuid().optional(),
+  user_id: z.string().uuid().optional(),
+  source_type: z.enum(['image', 'pdf', 'text', 'markdown', 'plain_text']).default('plain_text'),
+  content_mime_type: z.string().trim().min(1).max(120).optional(),
   verification_url: z.string().trim().url(),
   status: z.enum(['AUTHENTIQUE', 'CORROMPU/INCONNU']).default('AUTHENTIQUE'),
+  storage_provider: z.enum(['none', 's3', 'custom']).default('none'),
+  storage_object_url: z.string().trim().url().optional(),
 })
 
 export default defineEventHandler(async (event) => {
@@ -20,24 +29,25 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const pool = getDbPool()
-  const { rows } = await pool.query<{ id: string }>(
-    `
-      INSERT INTO signatures (content_hash, signature, creator_id, verification_url, status)
-      VALUES ($1, $2, $3, $4, $5)
-      RETURNING id
-    `,
-    [
-      parsed.data.content_hash,
-      parsed.data.signature,
-      parsed.data.creator_id,
-      parsed.data.verification_url,
-      parsed.data.status,
-    ],
-  )
+  const db = getDb()
+  const currentProfile = await getCurrentProfile()
+  const runtimeStorageProvider = resolveStorageProvider()
+  const [created] = await db.insert(signatures).values({
+    contentHash: parsed.data.content_hash,
+    signature: parsed.data.signature,
+    creatorId: parsed.data.creator_id ?? currentProfile?.handle ?? 'anonymous',
+    userId: parsed.data.user_id ?? currentProfile?.userId ?? null,
+    profileId: parsed.data.profile_id ?? currentProfile?.profileId ?? null,
+    sourceType: parsed.data.source_type,
+    contentMimeType: parsed.data.content_mime_type ?? null,
+    verificationUrl: parsed.data.verification_url,
+    status: parsed.data.status,
+    storageProvider: parsed.data.storage_provider ?? runtimeStorageProvider,
+    storageObjectUrl: parsed.data.storage_object_url ?? null,
+  }).returning({ id: signatures.id })
 
   return {
-    id: rows[0]?.id,
+    id: created?.id,
     status: 'stored',
   }
 })

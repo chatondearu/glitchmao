@@ -1,5 +1,7 @@
+import { desc, eq } from 'drizzle-orm'
 import type { VerificationResult } from '../utils/verify'
-import { getDbPool } from '../utils/db'
+import { getDb } from '../utils/db'
+import { signatures } from '../db/schema'
 import { computeSha256, verifyGpgSignature } from '../utils/verify'
 
 export default defineEventHandler(async (event): Promise<VerificationResult> => {
@@ -14,22 +16,17 @@ export default defineEventHandler(async (event): Promise<VerificationResult> => 
   }
 
   const computedHash = computeSha256(fileEntry.data)
-  const pool = getDbPool()
-
-  const { rows } = await pool.query<{
-    id: string
-    signature: string
-    content_hash: string
-  }>(
-    `
-      SELECT id, signature, content_hash
-      FROM signatures
-      WHERE content_hash = $1
-      ORDER BY created_at DESC
-      LIMIT 1
-    `,
-    [computedHash],
-  )
+  const db = getDb()
+  const rows = await db
+    .select({
+      id: signatures.id,
+      signature: signatures.signature,
+      contentHash: signatures.contentHash,
+    })
+    .from(signatures)
+    .where(eq(signatures.contentHash, computedHash))
+    .orderBy(desc(signatures.createdAt))
+    .limit(1)
 
   if (!rows.length) {
     return {
@@ -39,18 +36,17 @@ export default defineEventHandler(async (event): Promise<VerificationResult> => 
   }
 
   const row = rows[0]
-  const signatureOk = await verifyGpgSignature(row.signature, row.content_hash)
+  const signatureOk = await verifyGpgSignature(row.signature, row.contentHash)
   const status = signatureOk ? 'AUTHENTIQUE' : 'CORROMPU/INCONNU'
   const details = signatureOk ? 'Uploaded content matches a valid signature' : 'Stored signature is invalid'
 
-  await pool.query(
-    `
-      UPDATE signatures
-      SET last_verification_at = NOW(), status = $2
-      WHERE id = $1
-    `,
-    [row.id, status],
-  )
+  await db
+    .update(signatures)
+    .set({
+      lastVerificationAt: new Date(),
+      status,
+    })
+    .where(eq(signatures.id, row.id))
 
   return { status, details }
 })

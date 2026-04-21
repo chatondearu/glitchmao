@@ -1,6 +1,8 @@
 import { z } from 'zod'
+import { desc, eq } from 'drizzle-orm'
 import type { VerificationResult } from '../utils/verify'
-import { getDbPool } from '../utils/db'
+import { getDb } from '../utils/db'
+import { signatures } from '../db/schema'
 import { verifyGpgSignature } from '../utils/verify'
 
 const querySchema = z.object({
@@ -16,20 +18,16 @@ export default defineEventHandler(async (event): Promise<VerificationResult> => 
     })
   }
 
-  const pool = getDbPool()
-  const { rows } = await pool.query<{
-    signature: string
-    content_hash: string
-  }>(
-    `
-      SELECT signature, content_hash
-      FROM signatures
-      WHERE content_hash = $1
-      ORDER BY created_at DESC
-      LIMIT 1
-    `,
-    [parsed.data.hash],
-  )
+  const db = getDb()
+  const rows = await db
+    .select({
+      signature: signatures.signature,
+      contentHash: signatures.contentHash,
+    })
+    .from(signatures)
+    .where(eq(signatures.contentHash, parsed.data.hash))
+    .orderBy(desc(signatures.createdAt))
+    .limit(1)
 
   if (!rows.length) {
     return {
@@ -39,7 +37,7 @@ export default defineEventHandler(async (event): Promise<VerificationResult> => 
   }
 
   const row = rows[0]
-  const signatureOk = await verifyGpgSignature(row.signature, row.content_hash)
+  const signatureOk = await verifyGpgSignature(row.signature, row.contentHash)
 
   return signatureOk
     ? { status: 'AUTHENTIQUE', details: 'Hash and signature are valid' }
