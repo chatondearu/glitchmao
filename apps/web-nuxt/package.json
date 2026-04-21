@@ -8,8 +8,12 @@
     "preview": "nuxi preview"
   },
   "dependencies": {
+    "@nuxt/vite-builder": "^4.4.2",
     "nuxt": "^4.0.3",
     "pg": "^8.16.0",
     "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "vue-tsc": "^2.2.8"
   }
 }
