@@ -3,7 +3,7 @@ import { getDb } from '../utils/db'
 import { getCurrentProfile } from '../utils/current-user'
 import { getActiveSigningKey } from '../utils/gpg-keyring'
 import { resolveStorageProvider } from '../utils/storage'
-import { signGpgHash } from '../utils/verify'
+import { signHashWithSigner } from '../utils/signer-service'
 import { signatures } from '../db/schema'
 
 const bodySchema = z.object({
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, statusMessage: 'No signing identity configured' })
   }
 
-  const generatedSignature = await signGpgHash(parsed.data.content_hash, signingIdentity)
+  const generatedSignature = await signHashWithSigner(parsed.data.content_hash, signingIdentity)
   const [created] = await db.insert(signatures).values({
     contentHash: parsed.data.content_hash,
     signature: generatedSignature,

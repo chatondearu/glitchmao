@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     gpgHome: process.env.GPG_HOME ?? '',
     gpgDefaultKeyName: process.env.GPG_DEFAULT_KEY_NAME ?? 'GlitchMao User',
     gpgDefaultKeyDomain: process.env.GPG_DEFAULT_KEY_DOMAIN ?? 'glitchmao.local',
+    signerServiceUrl: process.env.SIGNER_SERVICE_URL ?? 'http://signer:4000',
     verificationBaseUrl: process.env.VERIFICATION_BASE_URL ?? 'http://localhost:3000/verify',
     storageProvider: process.env.STORAGE_PROVIDER ?? 'none',
     storageBucket: process.env.STORAGE_BUCKET ?? '',

@@ -25,6 +25,7 @@ services:
     environment:
       DATABASE_URL: postgresql://glitchmao:glitchmao@postgres:5432/glitchmao_test
       GPG_KEY_ID: test@glitchmao.local
+      SIGNER_SERVICE_URL: http://signer:4000
       VERIFICATION_BASE_URL: http://localhost:3000/verify
       STORAGE_PROVIDER: none
       STORAGE_BUCKET: ""
@@ -36,8 +37,28 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      signer:
+        condition: service_started
+
+  signer:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.dev
+    working_dir: /workspace
+    command: sh -lc "cargo run -p signer-service"
+    environment:
+      GPG_KEY_ID: test@glitchmao.local
+      SIGNER_DEFAULT_KEY_ID: test@glitchmao.local
+      SIGNER_HOST: 0.0.0.0
+      SIGNER_PORT: 4000
+    volumes:
+      - .:/workspace
+      - signer_test_cargo_cache:/usr/local/cargo/registry
+      - signer_test_gpg_home:/root/.gnupg
 
 volumes:
   pg_data_test:
   web_test_npm_cache:
   web_test_cargo_cache:
+  signer_test_cargo_cache:
+  signer_test_gpg_home:

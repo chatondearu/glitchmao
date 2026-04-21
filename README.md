@@ -51,6 +51,7 @@ GlitchMao is an open-source authenticity toolkit that links creator identity to 
 - `docker-compose.yml` (default): production-like runtime (`build + preview`).
 - `docker-compose.dev.yml`: development runtime with bind mounts and Nuxt dev server.
 - `docker-compose.test.yml`: test runtime with dedicated Postgres DB and CI-style app checks (`test + build`).
+- All stacks now include a dedicated Rust signer service (`signer-service`) used by the web API for signature generation.
 
 ### Start production-like stack
 

@@ -1,0 +1,11 @@
+[package]
+name = "signer-service"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+axum.workspace = true
+serde.workspace = true
+tokio.workspace = true
+crypto-core = { path = "../crypto-core" }
