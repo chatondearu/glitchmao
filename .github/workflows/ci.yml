@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web checks and tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: apps/web-nuxt/package-lock.json
+
+      - name: Install web dependencies
+        run: npm ci --prefix apps/web-nuxt
+
+      - name: Typecheck
+        run: npm exec --prefix apps/web-nuxt -- vue-tsc --noEmit
+
+      - name: Run unit tests
+        run: npm run test --prefix apps/web-nuxt
+
+      - name: Build web app
+        run: npm run build --prefix apps/web-nuxt
+
+  rust:
+    name: Rust checks and tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cargo fmt check
+        run: cargo fmt --all -- --check
+
+      - name: Cargo clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Cargo test
+        run: cargo test --workspace --all-targets

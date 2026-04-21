@@ -1,0 +1,73 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  web-docs:
+    name: Build web and docs artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci --workspaces=false
+
+      - name: Install web dependencies
+        run: npm ci --prefix apps/web-nuxt
+
+      - name: Build web
+        run: npm run build --prefix apps/web-nuxt
+
+      - name: Build docs
+        run: npm run docs:build
+
+      - name: Upload web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-output
+          path: apps/web-nuxt/.output
+
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-output
+          path: doc/.vitepress/dist
+
+  rust-binaries:
+    name: Build Rust binaries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build release binaries
+        run: cargo build --release --workspace
+
+      - name: Upload signer binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: signer-service-binary
+          path: target/release/signer-service
+
+      - name: Upload cli binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: glitchmao-cli-binary
+          path: target/release/glitchmao
