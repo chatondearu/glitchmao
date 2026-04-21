@@ -32,7 +32,13 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 
 ALTER TABLE signatures
+  ALTER COLUMN status DROP DEFAULT;
+
+ALTER TABLE signatures
   ALTER COLUMN status TYPE signature_status USING status::signature_status;
+
+ALTER TABLE signatures
+  ALTER COLUMN status SET DEFAULT 'AUTHENTIQUE';
 
 ALTER TABLE signatures
   ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users (id) ON DELETE SET NULL,

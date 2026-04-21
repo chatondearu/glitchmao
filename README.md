@@ -161,6 +161,12 @@ nix develop -c cargo run -p glitchmao-cli -- bundle --text "hello" --key-id "$GP
   - mark key as compromised,
   - no key deletion from UI/API.
 
+### Signing key source and fallback behavior
+
+- Target behavior: signatures are generated with the current user's active default key managed through onboarding/settings.
+- `GPG_KEY_ID` is currently kept as a compatibility/bootstrap fallback for legacy and startup edge cases.
+- Long-term direction: remove fallback usage and require an active user key for every signature operation.
+
 ## Generate a test GPG key
 
 ```bash
@@ -172,7 +178,7 @@ Set `GPG_KEY_ID` in `.env` to the generated key ID or email.
 ### Environment variables used
 
 - `DATABASE_URL`
-- `GPG_KEY_ID`
+- `GPG_KEY_ID` (compatibility/bootstrap fallback; not the primary key source after onboarding)
 - `GPG_HOME`
 - `GPG_DEFAULT_KEY_NAME`
 - `GPG_DEFAULT_KEY_DOMAIN`

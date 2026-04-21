@@ -42,10 +42,11 @@
   - Do not delete keys from user-facing settings.
   - Allow compromise reporting and key default switching only.
   - Keep private key material in GPG keyring (service-side), not in PostgreSQL.
+  - Use active default user key as primary signing source after onboarding.
+  - Keep `GPG_KEY_ID` as compatibility/bootstrap fallback only during transition.
 
 ## Commit Policy
 
 - Use Conventional Commits.
 - Recommended format: `type(scope): short summary`.
 - Common types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `build`, `ci`.
-

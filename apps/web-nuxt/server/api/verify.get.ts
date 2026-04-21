@@ -3,7 +3,7 @@ import { desc, eq } from 'drizzle-orm'
 import type { VerificationResult } from '../utils/verify'
 import { getDb } from '../utils/db'
 import { signatures } from '../db/schema'
-import { verifyGpgSignature } from '../utils/verify'
+import { verifySignatureWithSigner } from '../utils/signer-service'
 
 const querySchema = z.object({
   hash: z.string().trim().min(64).max(64),
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event): Promise<VerificationResult> => 
   }
 
   const row = rows[0]
-  const signatureOk = await verifyGpgSignature(row.signature, row.contentHash)
+  const signatureOk = await verifySignatureWithSigner(row.signature, row.contentHash)
 
   return signatureOk
     ? { status: 'AUTHENTIQUE', details: 'Hash and signature are valid' }

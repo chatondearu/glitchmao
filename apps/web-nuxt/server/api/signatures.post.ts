@@ -42,9 +42,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const runtimeStorageProvider = resolveStorageProvider()
-  const config = useRuntimeConfig()
-
-  const signingIdentity = activeSigningKey.fingerprint || activeSigningKey.keyId || config.gpgKeyId
+  const signingIdentity = activeSigningKey.fingerprint || activeSigningKey.keyId
   if (!signingIdentity) {
     throw createError({ statusCode: 500, statusMessage: 'No signing identity configured' })
   }

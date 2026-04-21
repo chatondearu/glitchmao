@@ -26,16 +26,17 @@ services:
       context: .
       dockerfile: infra/docker/Dockerfile.dev
     working_dir: /workspace
-    command: sh -lc "cargo run --release -p signer-service"
+    command: sh -lc "mkdir -p /gnupg && chmod 700 /gnupg && cargo run --release -p signer-service"
     environment:
       GPG_KEY_ID: test@glitchmao.local
       SIGNER_DEFAULT_KEY_ID: test@glitchmao.local
       SIGNER_HOST: 0.0.0.0
       SIGNER_PORT: 4000
+      GNUPGHOME: /gnupg
     volumes:
       - .:/workspace
       - signer_prod_cargo_cache:/usr/local/cargo/registry
-      - signer_prod_gpg_home:/root/.gnupg
+      - signer_prod_gpg_home:/gnupg
 
   postgres:
     image: postgres:16

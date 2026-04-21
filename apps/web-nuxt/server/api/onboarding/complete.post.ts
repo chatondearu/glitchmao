@@ -1,8 +1,9 @@
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { getDb } from '../../utils/db'
-import { generateDefaultGpgKey, getActiveSigningKey } from '../../utils/gpg-keyring'
+import { getActiveSigningKey } from '../../utils/gpg-keyring'
 import { getCurrentProfile } from '../../utils/current-user'
+import { generateKeyWithSigner } from '../../utils/signer-service'
 import { gpgKeys, profiles, users } from '../../db/schema'
 
 const bodySchema = z.object({
@@ -29,12 +30,12 @@ export default defineEventHandler(async (event) => {
     if (current.onboardingCompletedAt && activeKey)
       throw createError({ statusCode: 409, statusMessage: 'Onboarding already completed' })
 
-    const key = await generateDefaultGpgKey(parsed.data.display_name || current.displayName, parsed.data.handle || current.handle)
+    const key = await generateKeyWithSigner(parsed.data.display_name || current.displayName, parsed.data.handle || current.handle)
     await db.update(gpgKeys).set({ isDefault: false, updatedAt: new Date() }).where(eq(gpgKeys.userId, current.userId))
     const [createdKey] = await db.insert(gpgKeys).values({
       userId: current.userId,
       fingerprint: key.fingerprint,
-      keyId: key.keyId,
+      keyId: key.key_id,
       algorithm: key.algorithm,
       status: 'active',
       isDefault: true,
@@ -55,7 +56,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const key = await generateDefaultGpgKey(parsed.data.display_name, parsed.data.handle)
+  const key = await generateKeyWithSigner(parsed.data.display_name, parsed.data.handle)
   const result = await db.transaction(async (tx) => {
     const [createdUser] = await tx.insert(users).values({
       handle: parsed.data.handle,
@@ -74,7 +75,7 @@ export default defineEventHandler(async (event) => {
     const [createdKey] = await tx.insert(gpgKeys).values({
       userId: createdUser.id,
       fingerprint: key.fingerprint,
-      keyId: key.keyId,
+      keyId: key.key_id,
       algorithm: key.algorithm,
       status: 'active',
       isDefault: true,
