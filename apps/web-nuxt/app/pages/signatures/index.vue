@@ -12,26 +12,44 @@ interface SignatureItem {
   displayName: string | null
 }
 
+interface ProfileFilterItem {
+  profileId: string
+  userId: string
+  handle: string
+  displayName: string
+}
+
 const items = ref<SignatureItem[]>([])
+const profiles = ref<ProfileFilterItem[]>([])
 const sourceType = ref<string>('')
+const profileId = ref<string>('')
 const from = ref('')
 const to = ref('')
 const loading = ref(false)
 const error = ref('')
+const nextCursor = ref<string | null>(null)
 
-async function fetchSignatures() {
+async function fetchProfiles() {
+  const response = await $fetch<{ items: ProfileFilterItem[] }>('/api/profiles')
+  profiles.value = response.items
+}
+
+async function fetchSignatures(append = false) {
   loading.value = true
   error.value = ''
   try {
-    const response = await $fetch<{ items: SignatureItem[] }>('/api/signatures', {
+    const response = await $fetch<{ items: SignatureItem[]; nextCursor: string | null }>('/api/signatures', {
       query: {
         source_type: sourceType.value || undefined,
+        profile_id: profileId.value || undefined,
         from: from.value ? new Date(from.value).toISOString() : undefined,
         to: to.value ? new Date(to.value).toISOString() : undefined,
-        limit: 50,
+        cursor: append ? nextCursor.value ?? undefined : undefined,
+        limit: 25,
       },
     })
-    items.value = response.items
+    items.value = append ? [...items.value, ...response.items] : response.items
+    nextCursor.value = response.nextCursor
   }
   catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to load signatures'
@@ -41,7 +59,15 @@ async function fetchSignatures() {
   }
 }
 
-onMounted(fetchSignatures)
+function applyFilters() {
+  nextCursor.value = null
+  fetchSignatures(false)
+}
+
+onMounted(async () => {
+  await fetchProfiles()
+  await fetchSignatures(false)
+})
 </script>
 
 <template>
@@ -57,7 +83,7 @@ onMounted(fetchSignatures)
       </div>
     </div>
 
-    <form class="mt-5 grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-4" @submit.prevent="fetchSignatures">
+    <form class="mt-5 grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-5" @submit.prevent="applyFilters">
       <UiFormField>
         <UiLabel for="source-filter">
           Type
@@ -80,6 +106,19 @@ onMounted(fetchSignatures)
           </option>
           <option value="plain_text">
             Texte simple
+          </option>
+        </select>
+      </UiFormField>
+      <UiFormField>
+        <UiLabel for="profile-filter">
+          Profil
+        </UiLabel>
+        <select id="profile-filter" v-model="profileId" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+          <option value="">
+            Tous
+          </option>
+          <option v-for="profile in profiles" :key="profile.profileId" :value="profile.profileId">
+            {{ profile.displayName }} (@{{ profile.handle }})
           </option>
         </select>
       </UiFormField>
@@ -157,6 +196,11 @@ onMounted(fetchSignatures)
           </tr>
         </tbody>
       </table>
+    </div>
+    <div v-if="nextCursor" class="mt-4 flex justify-center">
+      <UiButton type="button" variant="secondary" @click="fetchSignatures(true)">
+        Charger plus
+      </UiButton>
     </div>
   </main>
 </template>

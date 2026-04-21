@@ -41,10 +41,42 @@ GlitchMao is an open-source authenticity toolkit that links creator identity to 
   ```bash
    cp .env.example .env
   ```
-4. Start the stack with Docker:
+4. Start the stack with Docker (dev mode):
   ```bash
-   docker compose up --build
+   docker compose -f docker-compose.dev.yml up --build
   ```
+
+## Docker Compose environments
+
+- `docker-compose.yml` (default): production-like runtime (`build + preview`).
+- `docker-compose.dev.yml`: development runtime with bind mounts and Nuxt dev server.
+- `docker-compose.test.yml`: test runtime with dedicated Postgres DB and CI-style app checks (`test + build`).
+
+### Start production-like stack
+
+```bash
+docker compose up --build
+```
+
+### Start development stack
+
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+
+### Run test stack
+
+```bash
+docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from web-test
+```
+
+### Stop and cleanup (any stack)
+
+```bash
+docker compose -f docker-compose.dev.yml down -v
+docker compose -f docker-compose.test.yml down -v
+docker compose down -v
+```
 
 ## Web UI conventions (Nuxt)
 

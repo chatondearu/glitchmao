@@ -6,6 +6,7 @@
     "dev": "nuxi dev",
     "build": "nuxi build",
     "preview": "nuxi preview",
+    "test": "vitest run",
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config drizzle.config.ts"
   },
@@ -24,6 +25,7 @@
     "@unocss/nuxt": "^66.6.8",
     "@unocss/preset-icons": "^66.6.8",
     "unocss": "^66.6.8",
+    "vitest": "^3.2.4",
     "vue-tsc": "^2.2.8"
   }
 }

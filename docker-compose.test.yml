@@ -1,0 +1,43 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: glitchmao
+      POSTGRES_PASSWORD: glitchmao
+      POSTGRES_DB: glitchmao_test
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_data_test:/var/lib/postgresql/data
+      - ./infra/db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U glitchmao -d glitchmao_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web-test:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.dev
+    working_dir: /workspace
+    command: sh -lc "npm install --prefix apps/web-nuxt && npm run test --prefix apps/web-nuxt && npm run build --prefix apps/web-nuxt"
+    environment:
+      DATABASE_URL: postgresql://glitchmao:glitchmao@postgres:5432/glitchmao_test
+      GPG_KEY_ID: test@glitchmao.local
+      VERIFICATION_BASE_URL: http://localhost:3000/verify
+      STORAGE_PROVIDER: none
+      STORAGE_BUCKET: ""
+      STORAGE_BASE_URL: ""
+    volumes:
+      - .:/workspace
+      - web_test_npm_cache:/root/.npm
+      - web_test_cargo_cache:/usr/local/cargo/registry
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pg_data_test:
+  web_test_npm_cache:
+  web_test_cargo_cache:

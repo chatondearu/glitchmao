@@ -11,6 +11,9 @@ services:
       DATABASE_URL: postgresql://glitchmao:glitchmao@postgres:5432/glitchmao
       GPG_KEY_ID: test@glitchmao.local
       VERIFICATION_BASE_URL: http://localhost:3000/verify
+      STORAGE_PROVIDER: none
+      STORAGE_BUCKET: ""
+      STORAGE_BASE_URL: ""
     depends_on:
       postgres:
         condition: service_healthy

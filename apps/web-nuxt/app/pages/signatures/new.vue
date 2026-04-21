@@ -2,7 +2,6 @@
 type SourceType = 'image' | 'pdf' | 'text' | 'markdown' | 'plain_text'
 
 const sourceType = ref<SourceType>('plain_text')
-const signatureValue = ref('')
 const plainText = ref('')
 const textContent = ref('')
 const markdownContent = ref('')
@@ -43,7 +42,6 @@ async function submitSignature() {
       method: 'POST',
       body: {
         content_hash: contentHash,
-        signature: signatureValue.value,
         creator_id: creatorId.value || undefined,
         source_type: sourceType.value,
         content_mime_type: uploadedFile.value?.type || undefined,
@@ -116,13 +114,6 @@ async function submitSignature() {
           Fichier a signer
         </UiLabel>
         <input id="upload-file" type="file" :accept="sourceType === 'image' ? 'image/*' : 'application/pdf'" class="w-full text-sm" required @change="(event) => uploadedFile = (event.target as HTMLInputElement).files?.[0] ?? null">
-      </UiFormField>
-
-      <UiFormField>
-        <UiLabel for="signature-value">
-          Signature ASCII (GPG)
-        </UiLabel>
-        <textarea id="signature-value" v-model="signatureValue" class="min-h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" required />
       </UiFormField>
 
       <UiFormField>

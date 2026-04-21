@@ -13,6 +13,8 @@ export async function getCurrentProfile() {
       bio: profiles.bio,
       avatarUrl: profiles.avatarUrl,
       keyFingerprint: profiles.keyFingerprint,
+      onboardingCompletedAt: profiles.onboardingCompletedAt,
+      onboardingVersion: profiles.onboardingVersion,
     })
     .from(profiles)
     .innerJoin(users, eq(profiles.userId, users.id))

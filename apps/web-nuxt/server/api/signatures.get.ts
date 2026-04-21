@@ -1,13 +1,15 @@
-import { and, desc, eq, gte, lte } from 'drizzle-orm'
+import { and, desc, eq, gte, lt, lte, or } from 'drizzle-orm'
 import { z } from 'zod'
 import { getDb } from '../utils/db'
 import { signatures, users } from '../db/schema'
+import { decodeSignaturesCursor, encodeSignaturesCursor } from '../utils/pagination'
 
 const querySchema = z.object({
   source_type: z.enum(['image', 'pdf', 'text', 'markdown', 'plain_text']).optional(),
   profile_id: z.string().uuid().optional(),
   from: z.string().datetime().optional(),
   to: z.string().datetime().optional(),
+  cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(25),
 })
 
@@ -18,11 +20,27 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = getDb()
+  let decodedCursor: { createdAt: string, id: string } | null = null
+  if (parsed.data.cursor) {
+    try {
+      decodedCursor = decodeSignaturesCursor(parsed.data.cursor)
+    }
+    catch {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid cursor' })
+    }
+  }
+
   const filters = [
     parsed.data.source_type ? eq(signatures.sourceType, parsed.data.source_type) : undefined,
     parsed.data.profile_id ? eq(signatures.profileId, parsed.data.profile_id) : undefined,
     parsed.data.from ? gte(signatures.createdAt, new Date(parsed.data.from)) : undefined,
     parsed.data.to ? lte(signatures.createdAt, new Date(parsed.data.to)) : undefined,
+    decodedCursor
+      ? or(
+          lt(signatures.createdAt, new Date(decodedCursor.createdAt)),
+          and(eq(signatures.createdAt, new Date(decodedCursor.createdAt)), lt(signatures.id, decodedCursor.id)),
+        )
+      : undefined,
   ].filter(Boolean)
 
   const rows = await db
@@ -41,11 +59,19 @@ export default defineEventHandler(async (event) => {
     .from(signatures)
     .leftJoin(users, eq(signatures.userId, users.id))
     .where(filters.length ? and(...filters) : undefined)
-    .orderBy(desc(signatures.createdAt))
-    .limit(parsed.data.limit)
+    .orderBy(desc(signatures.createdAt), desc(signatures.id))
+    .limit(parsed.data.limit + 1)
+
+  const hasMore = rows.length > parsed.data.limit
+  const items = hasMore ? rows.slice(0, parsed.data.limit) : rows
+  const lastItem = items[items.length - 1]
+  const nextCursor = hasMore && lastItem
+    ? encodeSignaturesCursor({ createdAt: lastItem.createdAt.toISOString(), id: lastItem.id })
+    : null
 
   return {
-    items: rows,
-    count: rows.length,
+    items,
+    count: items.length,
+    nextCursor,
   }
 })

@@ -1,11 +1,23 @@
 <script setup lang="ts">
 const route = useRoute()
+const onboardingRequired = useState<boolean>('onboarding-required', () => false)
 const navItems = [
   { to: '/', label: 'Verifier' },
   { to: '/signatures/new', label: 'Creer' },
   { to: '/signatures', label: 'Signatures' },
   { to: '/profile', label: 'Profil' },
+  { to: '/settings', label: 'Settings' },
 ]
+
+onMounted(async () => {
+  try {
+    const response = await $fetch<{ onboardingRequired: boolean }>('/api/onboarding/state')
+    onboardingRequired.value = response.onboardingRequired
+  }
+  catch {
+    onboardingRequired.value = true
+  }
+})
 </script>
 
 <template>
@@ -15,7 +27,7 @@ const navItems = [
         <NuxtLink to="/" class="text-lg font-semibold text-slate-900">
           GlitchMao
         </NuxtLink>
-        <nav class="flex flex-wrap items-center gap-2">
+        <nav v-if="!onboardingRequired || route.path === '/onboarding'" class="flex flex-wrap items-center gap-2">
           <NuxtLink
             v-for="item in navItems"
             :key="item.to"
