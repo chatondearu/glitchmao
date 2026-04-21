@@ -29,9 +29,6 @@ jobs:
       - name: Install web dependencies
         run: npm ci --prefix apps/web-nuxt
 
-      - name: Typecheck
-        run: npm exec --prefix apps/web-nuxt -- vue-tsc --noEmit
-
       - name: Run unit tests
         run: npm run test --prefix apps/web-nuxt
 

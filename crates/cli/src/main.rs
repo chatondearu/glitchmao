@@ -60,7 +60,8 @@ fn main() -> Result<()> {
             println!("{signature}");
         }
         Commands::SignFile { file, key_id } => {
-            let content = fs::read_to_string(&file).with_context(|| format!("failed to read file {file}"))?;
+            let content =
+                fs::read_to_string(&file).with_context(|| format!("failed to read file {file}"))?;
             let signature = sign_text_detached_ascii(&content, &key_id)?;
             println!("{signature}");
         }
@@ -91,7 +92,9 @@ fn main() -> Result<()> {
 fn resolve_payload(text: Option<String>, file: Option<String>) -> Result<String> {
     match (text, file) {
         (Some(value), None) => Ok(value),
-        (None, Some(path)) => fs::read_to_string(&path).with_context(|| format!("failed to read file {path}")),
+        (None, Some(path)) => {
+            fs::read_to_string(&path).with_context(|| format!("failed to read file {path}"))
+        }
         _ => anyhow::bail!("exactly one of --text or --file must be provided"),
     }
 }

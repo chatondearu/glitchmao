@@ -33,7 +33,9 @@ pub fn sign_text_detached_ascii(text: &str, key_id: &str) -> Result<String, Sign
         .map_err(SignerError::Spawn)?;
 
     if let Some(stdin) = child.stdin.as_mut() {
-        stdin.write_all(text.as_bytes()).map_err(SignerError::Stdin)?;
+        stdin
+            .write_all(text.as_bytes())
+            .map_err(SignerError::Stdin)?;
     }
 
     let output = child.wait_with_output().map_err(SignerError::Spawn)?;

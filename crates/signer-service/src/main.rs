@@ -1,6 +1,5 @@
 use std::{
-    env,
-    fs,
+    env, fs,
     io::Write,
     net::SocketAddr,
     path::PathBuf,
@@ -104,7 +103,10 @@ async fn sign_hash(
     Json(payload): Json<SignRequest>,
 ) -> Result<Json<SignResponse>, (axum::http::StatusCode, String)> {
     if payload.content_hash.trim().is_empty() {
-        return Err((axum::http::StatusCode::BAD_REQUEST, "content_hash is required".to_string()));
+        return Err((
+            axum::http::StatusCode::BAD_REQUEST,
+            "content_hash is required".to_string(),
+        ));
     }
 
     let key_id = payload
@@ -119,8 +121,12 @@ async fn sign_hash(
         ));
     }
 
-    let signature = sign_text_detached_ascii(&payload.content_hash, &key_id)
-        .map_err(|error| (axum::http::StatusCode::INTERNAL_SERVER_ERROR, error.to_string()))?;
+    let signature = sign_text_detached_ascii(&payload.content_hash, &key_id).map_err(|error| {
+        (
+            axum::http::StatusCode::INTERNAL_SERVER_ERROR,
+            error.to_string(),
+        )
+    })?;
 
     Ok(Json(SignResponse {
         signature: signature.trim().to_string(),
@@ -246,8 +252,10 @@ fn run_gpg_verify_inline(signature: &str, content_hash: &str) -> Result<bool, St
     let sig_path: PathBuf = temp_dir.join(format!("glitchmao-signature-{nonce}.asc"));
     let hash_path: PathBuf = temp_dir.join(format!("glitchmao-hash-{nonce}.txt"));
 
-    fs::write(&sig_path, signature).map_err(|error| format!("failed to write temp signature: {error}"))?;
-    fs::write(&hash_path, content_hash).map_err(|error| format!("failed to write temp hash: {error}"))?;
+    fs::write(&sig_path, signature)
+        .map_err(|error| format!("failed to write temp signature: {error}"))?;
+    fs::write(&hash_path, content_hash)
+        .map_err(|error| format!("failed to write temp hash: {error}"))?;
 
     let output = Command::new("gpg")
         .arg("--verify")
