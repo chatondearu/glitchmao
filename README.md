@@ -4,7 +4,7 @@ GlitchMao is an open-source authenticity toolkit that links creator identity to 
 
 ## Stack
 
-- Rust workspace for hashing/signing engine and CLI.
+- Rust workspace for hashing/signing engine, CLI, and internal signer service.
 - Nuxt 4 for web UI and verification API routes.
 - Reka UI for accessible Vue primitives in the Nuxt app.
 - UnoCSS for utility-first styling in the Nuxt app.
@@ -15,6 +15,7 @@ GlitchMao is an open-source authenticity toolkit that links creator identity to 
 
 - `crates/crypto-core`: core Rust library (`sha256`, GPG signer, bundle type).
 - `crates/cli`: CLI for hash/sign/bundle.
+- `crates/signer-service`: internal Rust HTTP service used by web API to generate signatures.
 - `apps/web-nuxt/app`: Nuxt 4 application directory (`app.vue`, `pages/`, etc.).
 - `apps/web-nuxt/server`: Nuxt server directory (`/api/verify`, `/api/signatures`, utils).
 - `apps/web-nuxt/app/components/ui`: shared UI components built on top of Reka UI + UnoCSS.
@@ -51,7 +52,12 @@ GlitchMao is an open-source authenticity toolkit that links creator identity to 
 - `docker-compose.yml` (default): production-like runtime (`build + preview`).
 - `docker-compose.dev.yml`: development runtime with bind mounts and Nuxt dev server.
 - `docker-compose.test.yml`: test runtime with dedicated Postgres DB and CI-style app checks (`test + build`).
-- All stacks now include a dedicated Rust signer service (`signer-service`) used by the web API for signature generation.
+- All stacks include a dedicated Rust signer service (`signer-service`) used by the web API for signature generation.
+
+Service topology:
+- `web`: Nuxt app and API.
+- `signer`: Rust internal HTTP signer (`/sign`, `/health`).
+- `postgres`: persistence for profiles, signatures, and key metadata.
 
 ### Start production-like stack
 
@@ -139,6 +145,21 @@ nix develop -c cargo run -p glitchmao-cli -- bundle --text "hello" --key-id "$GP
 - `GET /api/verify?hash=<sha256>`: verify a known hash against stored signature.
 - `POST /api/verify` with multipart `file`: hash uploaded file then verify.
 - `POST /api/signatures`: store a signature record.
+- `GET /api/onboarding/state`: onboarding gate state (profile/key readiness).
+- `POST /api/onboarding/complete`: complete onboarding and generate a default key.
+- `GET /api/settings/gpg-keys`: list keys and active default status.
+- `POST /api/settings/gpg-keys/default`: switch default signing key.
+- `POST /api/settings/gpg-keys/:id/compromise`: mark a key as compromised (no deletion).
+
+## Onboarding and key management
+
+- On first access, onboarding is required when no profile exists or no active default GPG key is available.
+- Onboarding includes project explanation slides and profile setup.
+- A default GPG key is generated automatically during onboarding.
+- Keys are managed through Settings:
+  - set default key,
+  - mark key as compromised,
+  - no key deletion from UI/API.
 
 ## Generate a test GPG key
 
@@ -147,6 +168,19 @@ gpg --quick-generate-key "GlitchMao Test <test@glitchmao.local>" ed25519 sign 1y
 ```
 
 Set `GPG_KEY_ID` in `.env` to the generated key ID or email.
+
+### Environment variables used
+
+- `DATABASE_URL`
+- `GPG_KEY_ID`
+- `GPG_HOME`
+- `GPG_DEFAULT_KEY_NAME`
+- `GPG_DEFAULT_KEY_DOMAIN`
+- `SIGNER_SERVICE_URL`
+- `VERIFICATION_BASE_URL`
+- `STORAGE_PROVIDER`
+- `STORAGE_BUCKET`
+- `STORAGE_BASE_URL`
 
 ## Conventional Commits
 
