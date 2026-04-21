@@ -29,11 +29,11 @@ jobs:
       - name: Install web dependencies
         run: npm ci --prefix apps/web-nuxt
 
-      - name: Run unit tests
-        run: npm run test --prefix apps/web-nuxt
-
       - name: Build web app
         run: npm run build --prefix apps/web-nuxt
+
+      - name: Run unit tests
+        run: npm run test --prefix apps/web-nuxt
 
   rust:
     name: Rust checks and tests
