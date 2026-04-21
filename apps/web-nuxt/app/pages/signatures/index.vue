@@ -27,7 +27,9 @@ const from = ref('')
 const to = ref('')
 const loading = ref(false)
 const error = ref('')
+const copyError = ref('')
 const nextCursor = ref<string | null>(null)
+const copiedPublicId = ref<string | null>(null)
 
 async function fetchProfiles() {
   const response = await $fetch<{ items: ProfileFilterItem[] }>('/api/profiles')
@@ -62,6 +64,43 @@ async function fetchSignatures(append = false) {
 function applyFilters() {
   nextCursor.value = null
   fetchSignatures(false)
+}
+
+async function copyPublicId(publicId: string) {
+  copyError.value = ''
+  try {
+    await navigator.clipboard.writeText(publicId)
+    copiedPublicId.value = publicId
+    setTimeout(() => {
+      if (copiedPublicId.value === publicId)
+        copiedPublicId.value = null
+    }, 1600)
+  }
+  catch {
+    try {
+      const textarea = document.createElement('textarea')
+      textarea.value = publicId
+      textarea.setAttribute('readonly', 'true')
+      textarea.style.position = 'absolute'
+      textarea.style.left = '-9999px'
+      document.body.appendChild(textarea)
+      textarea.select()
+      const copied = document.execCommand('copy')
+      document.body.removeChild(textarea)
+
+      if (!copied)
+        throw new Error('execCommand copy failed')
+
+      copiedPublicId.value = publicId
+      setTimeout(() => {
+        if (copiedPublicId.value === publicId)
+          copiedPublicId.value = null
+      }, 1600)
+    }
+    catch {
+      copyError.value = 'Impossible de copier automatiquement. Copie manuelle requise.'
+    }
+  }
 }
 
 onMounted(async () => {
@@ -147,8 +186,11 @@ onMounted(async () => {
     <p v-if="error" class="mt-4 text-sm font-medium text-red-700">
       {{ error }}
     </p>
+    <p v-if="copyError" class="mt-2 text-sm font-medium text-amber-700">
+      {{ copyError }}
+    </p>
 
-    <div v-if="!loading && !error" class="mt-4 overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div v-if="!loading" class="mt-4 overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
       <table class="min-w-full text-sm">
         <thead class="bg-slate-100 text-left text-slate-700">
           <tr>
@@ -163,6 +205,9 @@ onMounted(async () => {
             </th>
             <th class="px-3 py-2">
               Statut
+            </th>
+            <th class="px-3 py-2">
+              ID public
             </th>
             <th class="px-3 py-2">
               Hash
@@ -185,12 +230,27 @@ onMounted(async () => {
                 {{ item.status }}
               </span>
             </td>
+            <td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  class="cursor-copy rounded px-1 py-0.5 text-left hover:bg-slate-100"
+                  :title="`Copier ${item.id}`"
+                  @click="copyPublicId(item.id)"
+                >
+                  {{ item.id }}
+                </button>
+                <UiButton type="button" variant="secondary" class="px-2 py-1 text-xs" @click="copyPublicId(item.id)">
+                  {{ copiedPublicId === item.id ? 'Copie' : 'Copier' }}
+                </UiButton>
+              </div>
+            </td>
             <td class="px-3 py-2 font-mono text-xs">
               {{ item.contentHash.slice(0, 16) }}...
             </td>
           </tr>
           <tr v-if="items.length === 0">
-            <td colspan="5" class="px-3 py-6 text-center text-slate-500">
+            <td colspan="6" class="px-3 py-6 text-center text-slate-500">
               Aucune signature.
             </td>
           </tr>

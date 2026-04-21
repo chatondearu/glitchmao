@@ -43,30 +43,74 @@ export default defineEventHandler(async (event) => {
       : undefined,
   ].filter(Boolean)
 
-  const rows = await db
-    .select({
-      id: signatures.id,
-      contentHash: signatures.contentHash,
-      creatorId: signatures.creatorId,
-      sourceType: signatures.sourceType,
-      status: signatures.status,
-      createdAt: signatures.createdAt,
-      profileId: signatures.profileId,
-      verificationUrl: signatures.verificationUrl,
-      handle: users.handle,
-      displayName: users.displayName,
-    })
-    .from(signatures)
-    .leftJoin(users, eq(signatures.userId, users.id))
-    .where(filters.length ? and(...filters) : undefined)
-    .orderBy(desc(signatures.createdAt), desc(signatures.id))
-    .limit(parsed.data.limit + 1)
+  let rows: Array<{
+    id: string
+    cursorId: string
+    contentHash: string
+    creatorId: string
+    sourceType: 'image' | 'pdf' | 'text' | 'markdown' | 'plain_text'
+    status: 'AUTHENTIQUE' | 'CORROMPU/INCONNU'
+    createdAt: Date
+    profileId: string | null
+    verificationUrl: string
+    handle: string | null
+    displayName: string | null
+  }>
+
+  try {
+    rows = await db
+      .select({
+        id: signatures.publicId,
+        cursorId: signatures.id,
+        contentHash: signatures.contentHash,
+        creatorId: signatures.creatorId,
+        sourceType: signatures.sourceType,
+        status: signatures.status,
+        createdAt: signatures.createdAt,
+        profileId: signatures.profileId,
+        verificationUrl: signatures.verificationUrl,
+        handle: users.handle,
+        displayName: users.displayName,
+      })
+      .from(signatures)
+      .leftJoin(users, eq(signatures.userId, users.id))
+      .where(filters.length ? and(...filters) : undefined)
+      .orderBy(desc(signatures.createdAt), desc(signatures.id))
+      .limit(parsed.data.limit + 1)
+  }
+  catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (!message.includes('public_id'))
+      throw error
+
+    rows = await db
+      .select({
+        id: signatures.id,
+        cursorId: signatures.id,
+        contentHash: signatures.contentHash,
+        creatorId: signatures.creatorId,
+        sourceType: signatures.sourceType,
+        status: signatures.status,
+        createdAt: signatures.createdAt,
+        profileId: signatures.profileId,
+        verificationUrl: signatures.verificationUrl,
+        handle: users.handle,
+        displayName: users.displayName,
+      })
+      .from(signatures)
+      .leftJoin(users, eq(signatures.userId, users.id))
+      .where(filters.length ? and(...filters) : undefined)
+      .orderBy(desc(signatures.createdAt), desc(signatures.id))
+      .limit(parsed.data.limit + 1)
+  }
 
   const hasMore = rows.length > parsed.data.limit
-  const items = hasMore ? rows.slice(0, parsed.data.limit) : rows
+  const limitedRows = hasMore ? rows.slice(0, parsed.data.limit) : rows
+  const items = limitedRows.map(({ cursorId: _cursorId, ...item }) => item)
+  const lastCursorRow = limitedRows[limitedRows.length - 1]
   const lastItem = items[items.length - 1]
-  const nextCursor = hasMore && lastItem
-    ? encodeSignaturesCursor({ createdAt: lastItem.createdAt.toISOString(), id: lastItem.id })
+  const nextCursor = hasMore && lastItem && lastCursorRow
+    ? encodeSignaturesCursor({ createdAt: lastItem.createdAt.toISOString(), id: lastCursorRow.cursorId })
     : null
 
   return {

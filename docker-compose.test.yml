@@ -9,7 +9,6 @@ services:
       - "5433:5432"
     volumes:
       - pg_data_test:/var/lib/postgresql/data
-      - ./infra/db/migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U glitchmao -d glitchmao_test"]
       interval: 5s
@@ -21,7 +20,7 @@ services:
       context: .
       dockerfile: infra/docker/Dockerfile.dev
     working_dir: /workspace
-    command: sh -lc "npm install --prefix apps/web-nuxt && npm run test --prefix apps/web-nuxt && npm run build --prefix apps/web-nuxt"
+    command: sh -lc "npm install --prefix apps/web-nuxt && npm run db:migrate:sql --prefix apps/web-nuxt && npm run test --prefix apps/web-nuxt && npm run build --prefix apps/web-nuxt"
     environment:
       DATABASE_URL: postgresql://glitchmao:glitchmao@postgres:5432/glitchmao_test
       GPG_KEY_ID: test@glitchmao.local

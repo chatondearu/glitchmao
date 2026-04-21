@@ -1,33 +1,66 @@
 import { z } from 'zod'
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, or } from 'drizzle-orm'
 import type { VerificationResult } from '../utils/verify'
 import { getDb } from '../utils/db'
 import { signatures } from '../db/schema'
 import { verifySignatureWithSigner } from '../utils/signer-service'
 
 const querySchema = z.object({
-  hash: z.string().trim().min(64).max(64),
+  hash: z.string().trim().min(64).max(64).optional(),
+  id: z.string().trim().min(8).max(64).optional(),
 })
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export default defineEventHandler(async (event): Promise<VerificationResult> => {
   const parsed = querySchema.safeParse(getQuery(event))
-  if (!parsed.success) {
+  if (!parsed.success || (!parsed.data.hash && !parsed.data.id)) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Invalid hash query parameter',
+      statusMessage: 'Provide either id or hash query parameter',
     })
   }
 
   const db = getDb()
-  const rows = await db
-    .select({
-      signature: signatures.signature,
-      contentHash: signatures.contentHash,
-    })
-    .from(signatures)
-    .where(eq(signatures.contentHash, parsed.data.hash))
-    .orderBy(desc(signatures.createdAt))
-    .limit(1)
+  let rows: Array<{ signature: string, contentHash: string }>
+  try {
+    rows = await db
+      .select({
+        signature: signatures.signature,
+        contentHash: signatures.contentHash,
+      })
+      .from(signatures)
+      .where(
+        parsed.data.id
+          ? (
+              uuidRegex.test(parsed.data.id)
+                ? or(eq(signatures.publicId, parsed.data.id), eq(signatures.id, parsed.data.id))
+                : eq(signatures.publicId, parsed.data.id)
+            )
+          : eq(signatures.contentHash, parsed.data.hash as string),
+      )
+      .orderBy(desc(signatures.createdAt))
+      .limit(1)
+  }
+  catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (!message.includes('public_id'))
+      throw error
+
+    rows = await db
+      .select({
+        signature: signatures.signature,
+        contentHash: signatures.contentHash,
+      })
+      .from(signatures)
+      .where(
+        parsed.data.id
+          ? (uuidRegex.test(parsed.data.id) ? eq(signatures.id, parsed.data.id) : eq(signatures.contentHash, parsed.data.id))
+          : eq(signatures.contentHash, parsed.data.hash as string),
+      )
+      .orderBy(desc(signatures.createdAt))
+      .limit(1)
+  }
 
   if (!rows.length) {
     return {

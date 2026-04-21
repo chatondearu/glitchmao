@@ -55,6 +55,7 @@ GlitchMao is an open-source authenticity toolkit that links creator identity to 
 - All stacks include a dedicated Rust signer service (`signer-service`) used by the web API for signature generation.
 
 Service topology:
+
 - `web`: Nuxt app and API.
 - `signer`: Rust internal HTTP signer (`/sign`, `/health`).
 - `postgres`: persistence for profiles, signatures, and key metadata.

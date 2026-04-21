@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { desc, eq } from 'drizzle-orm'
 import { getDb } from '../utils/db'
 import { getCurrentProfile } from '../utils/current-user'
 import { getActiveSigningKey } from '../utils/gpg-keyring'
@@ -13,11 +14,15 @@ const bodySchema = z.object({
   user_id: z.string().uuid().optional(),
   source_type: z.enum(['image', 'pdf', 'text', 'markdown', 'plain_text']).default('plain_text'),
   content_mime_type: z.string().trim().min(1).max(120).optional(),
-  verification_url: z.string().trim().url(),
+  verification_url: z.string().trim().url().optional(),
   status: z.enum(['AUTHENTIQUE', 'CORROMPU/INCONNU']).default('AUTHENTIQUE'),
   storage_provider: z.enum(['none', 's3', 'custom']).default('none'),
   storage_object_url: z.string().trim().url().optional(),
 })
+
+function buildPublicId(contentHash: string, timestampMs: number) {
+  return `${timestampMs}${contentHash.slice(-4)}`
+}
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -36,6 +41,52 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 403, statusMessage: 'Onboarding is required before signing' })
   }
 
+  try {
+    const [existing] = await db
+      .select({
+        id: signatures.id,
+        publicId: signatures.publicId,
+        verificationUrl: signatures.verificationUrl,
+      })
+      .from(signatures)
+      .where(eq(signatures.contentHash, parsed.data.content_hash))
+      .orderBy(desc(signatures.createdAt))
+      .limit(1)
+
+    if (existing) {
+      return {
+        id: existing.publicId,
+        internal_id: existing.id,
+        status: 'already_exists',
+        verification_url: existing.verificationUrl,
+      }
+    }
+  }
+  catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (!message.includes('public_id'))
+      throw error
+
+    const [legacyExisting] = await db
+      .select({
+        id: signatures.id,
+        verificationUrl: signatures.verificationUrl,
+      })
+      .from(signatures)
+      .where(eq(signatures.contentHash, parsed.data.content_hash))
+      .orderBy(desc(signatures.createdAt))
+      .limit(1)
+
+    if (legacyExisting) {
+      return {
+        id: legacyExisting.id,
+        internal_id: legacyExisting.id,
+        status: 'already_exists',
+        verification_url: legacyExisting.verificationUrl,
+      }
+    }
+  }
+
   const activeSigningKey = await getActiveSigningKey(currentProfile.userId)
   if (!activeSigningKey) {
     throw createError({ statusCode: 403, statusMessage: 'No active default GPG key available' })
@@ -48,7 +99,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const generatedSignature = await signHashWithSigner(parsed.data.content_hash, signingIdentity)
-  const [created] = await db.insert(signatures).values({
+  const baseValues = {
     contentHash: parsed.data.content_hash,
     signature: generatedSignature,
     creatorId: parsed.data.creator_id ?? currentProfile?.handle ?? 'anonymous',
@@ -56,16 +107,58 @@ export default defineEventHandler(async (event) => {
     profileId: parsed.data.profile_id ?? currentProfile?.profileId ?? null,
     sourceType: parsed.data.source_type,
     contentMimeType: parsed.data.content_mime_type ?? null,
-    verificationUrl: parsed.data.verification_url,
+    verificationUrl: parsed.data.verification_url ?? 'pending',
     status: parsed.data.status,
     storageProvider: parsed.data.storage_provider ?? runtimeStorageProvider,
     storageObjectUrl: parsed.data.storage_object_url ?? null,
     signingKeyId: activeSigningKey.id,
     signingKeyFingerprint: activeSigningKey.fingerprint,
-  }).returning({ id: signatures.id })
+  }
+
+  let created: { id: string, publicId: string } | undefined
+  let timestampMs = Date.now()
+  try {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const candidatePublicId = buildPublicId(parsed.data.content_hash, timestampMs + attempt)
+      const [inserted] = await db.insert(signatures).values({
+        ...baseValues,
+        publicId: candidatePublicId,
+      }).onConflictDoNothing().returning({ id: signatures.id, publicId: signatures.publicId })
+
+      if (inserted) {
+        created = inserted
+        break
+      }
+    }
+  }
+  catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (!message.includes('public_id'))
+      throw error
+
+    const [legacyInserted] = await db.insert(signatures).values(baseValues).returning({ id: signatures.id })
+    if (legacyInserted) {
+      created = {
+        id: legacyInserted.id,
+        publicId: legacyInserted.id,
+      }
+    }
+  }
+
+  if (!created) {
+    throw createError({ statusCode: 500, statusMessage: 'Unable to allocate public signature id' })
+  }
+
+  const config = useRuntimeConfig()
+  const verificationUrl = parsed.data.verification_url
+    ?? `${config.verificationBaseUrl}?id=${created.publicId}`
+
+  await db.update(signatures).set({ verificationUrl }).where(eq(signatures.id, created.id))
 
   return {
-    id: created?.id,
+    id: created.publicId,
+    internal_id: created.id,
     status: 'stored',
+    verification_url: verificationUrl,
   }
 })

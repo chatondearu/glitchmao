@@ -56,6 +56,7 @@ export const gpgKeyCompromiseEvents = pgTable('gpg_key_compromise_events', {
 
 export const signatures = pgTable('signatures', {
   id: uuid('id').defaultRandom().primaryKey(),
+  publicId: varchar('public_id', { length: 24 }).notNull().unique(),
   contentHash: char('content_hash', { length: 64 }).notNull(),
   signature: text('signature').notNull(),
   creatorId: text('creator_id').notNull(),
@@ -73,6 +74,7 @@ export const signatures = pgTable('signatures', {
   lastVerificationAt: timestamp('last_verification_at', { withTimezone: true }),
 }, table => ({
   contentHashIdx: index('idx_signatures_content_hash').on(table.contentHash),
+  publicIdIdx: index('idx_signatures_public_id').on(table.publicId),
   createdAtIdx: index('idx_signatures_created_at').on(table.createdAt.desc()),
   profileCreatedAtIdx: index('idx_signatures_profile_created_at').on(table.profileId, table.createdAt.desc()),
   sourceCreatedAtIdx: index('idx_signatures_source_created_at').on(table.sourceType, table.createdAt.desc()),
