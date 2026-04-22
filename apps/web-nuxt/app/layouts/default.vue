@@ -70,7 +70,7 @@ onMounted(async () => {
         </NuxtLink>
         <div class="flex items-center gap-2">
           <UiButton type="button" variant="ghost" size="sm" @click="toggleTheme">
-            {{ theme === 'dark' ? 'Light mode' : 'Dark mode' }}
+            {{ theme === 'dark' ? 'Mode clair' : 'Mode sombre' }}
           </UiButton>
           <template v-if="authState.authenticated">
             <span class="ui-meta-mono">{{ authState.user?.displayName }}</span>
@@ -91,12 +91,13 @@ onMounted(async () => {
         </div>
         <nav v-if="(!onboardingRequired || route.path === '/onboarding') && authState.authenticated" class="flex flex-wrap items-center gap-2">
           <NuxtLink
-            v-for="item in navItems"
+            v-for="(item, index) in navItems"
             :key="item.to"
             :to="item.to"
-            class="border border-outline-variant px-3 py-2 text-label-caps transition"
+            class="inline-flex items-center gap-2 border border-outline-variant px-3 py-2 text-label-caps transition"
             :class="route.path === item.to ? 'border-primary-container bg-primary-container text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'"
           >
+            <span v-if="index > 0" class="ui-meta-mono text-[10px] opacity-70">&gt;</span>
             {{ item.label }}
           </NuxtLink>
         </nav>

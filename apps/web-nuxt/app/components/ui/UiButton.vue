@@ -14,9 +14,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const variantClassMap: Record<NonNullable<Props['variant']>, string> = {
-  primary: 'bg-primary-container text-on-primary hover:opacity-85',
-  secondary: 'border-primary-container bg-transparent text-primary-container hover:bg-primary-container hover:text-on-primary',
-  ghost: 'border-outline-variant bg-surface-container-high text-on-surface hover:bg-surface-bright',
+  primary: 'border-primary-container bg-primary-container text-on-primary hover:brightness-110',
+  secondary: 'border-secondary bg-transparent text-secondary hover:border-primary-container hover:text-primary-container',
+  ghost: 'border-outline-variant bg-transparent text-on-surface-variant hover:border-primary-container hover:text-primary-container',
 }
 
 const sizeClassMap: Record<NonNullable<Props['size']>, string> = {
