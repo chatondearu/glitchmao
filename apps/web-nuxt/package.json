@@ -9,11 +9,13 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config drizzle.config.ts",
-    "db:migrate:sql": "node ./scripts/run-migrations.mjs"
+    "db:migrate:sql": "node ./scripts/run-migrations.mjs",
+    "db:watch:sql": "node ./scripts/watch-sql-migrations.mjs"
   },
   "dependencies": {
     "@nuxt/vite-builder": "^4.4.2",
     "drizzle-orm": "^0.45.2",
+    "nodemailer": "^8.0.5",
     "nuxt": "^4.0.3",
     "postgres": "^3.4.9",
     "reka-ui": "^2.9.6",
@@ -21,10 +23,10 @@
     "zod": "^3.24.4"
   },
   "devDependencies": {
-    "dotenv": "^17.4.2",
-    "drizzle-kit": "^0.31.10",
     "@unocss/nuxt": "^66.6.8",
     "@unocss/preset-icons": "^66.6.8",
+    "dotenv": "^17.4.2",
+    "drizzle-kit": "^0.31.10",
     "unocss": "^66.6.8",
     "vitest": "^3.2.4",
     "vue-tsc": "^2.2.8"

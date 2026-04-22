@@ -10,6 +10,8 @@
     "dev:web": "npm --prefix apps/web-nuxt run dev",
     "build:web": "npm --prefix apps/web-nuxt run build",
     "preview:web": "npm --prefix apps/web-nuxt run preview",
+    "dev:docker:up": "docker compose -f docker-compose.dev.yml up --build",
+    "dev:docker:rebuild": "docker compose -f docker-compose.dev.yml up -d --build web web-migrations signer",
     "docs:dev": "vitepress dev doc",
     "docs:build": "vitepress build doc",
     "docs:preview": "vitepress preview doc"

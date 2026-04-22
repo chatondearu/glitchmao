@@ -3,8 +3,8 @@ import { getCurrentProfile } from '../../utils/current-user'
 import { getDb } from '../../utils/db'
 import { gpgKeys } from '../../db/schema'
 
-export default defineEventHandler(async () => {
-  const profile = await getCurrentProfile()
+export default defineEventHandler(async (event) => {
+  const profile = await getCurrentProfile(event).catch(() => null)
   if (!profile) {
     return {
       onboardingRequired: true,

@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getDb } from '../utils/db'
 import { signatures, users } from '../db/schema'
 import { decodeSignaturesCursor, encodeSignaturesCursor } from '../utils/pagination'
+import { requireAuthSession } from '../utils/auth-session'
 
 const querySchema = z.object({
   source_type: z.enum(['image', 'pdf', 'text', 'markdown', 'plain_text']).optional(),
@@ -14,6 +15,7 @@ const querySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
+  const session = await requireAuthSession(event)
   const parsed = querySchema.safeParse(getQuery(event))
   if (!parsed.success) {
     throw createError({ statusCode: 400, statusMessage: 'Invalid filters' })
@@ -31,6 +33,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const filters = [
+    eq(signatures.userId, session.user.userId),
     parsed.data.source_type ? eq(signatures.sourceType, parsed.data.source_type) : undefined,
     parsed.data.profile_id ? eq(signatures.profileId, parsed.data.profile_id) : undefined,
     parsed.data.from ? gte(signatures.createdAt, new Date(parsed.data.from)) : undefined,

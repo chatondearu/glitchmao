@@ -10,6 +10,7 @@ export const gpgCompromiseReasonEnum = pgEnum('gpg_compromise_reason', ['user_re
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   handle: varchar('handle', { length: 80 }).notNull().unique(),
+  email: varchar('email', { length: 255 }).unique(),
   displayName: varchar('display_name', { length: 120 }).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
@@ -27,6 +28,40 @@ export const profiles = pgTable('profiles', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 }, table => ({
   userIdIdx: index('idx_profiles_user_id').on(table.userId),
+}))
+
+export const authCredentials = pgTable('auth_credentials', {
+  userId: uuid('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+  passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+  passwordSalt: varchar('password_salt', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+export const authSessions = pgTable('auth_sessions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  profileId: uuid('profile_id').references(() => profiles.id, { onDelete: 'set null' }),
+  tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+}, table => ({
+  userIdIdx: index('idx_auth_sessions_user_id').on(table.userId),
+  profileIdIdx: index('idx_auth_sessions_profile_id').on(table.profileId),
+  expiresAtIdx: index('idx_auth_sessions_expires_at').on(table.expiresAt),
+}))
+
+export const passwordResetTokens = pgTable('password_reset_tokens', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: varchar('token_hash', { length: 64 }).notNull().unique(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+}, table => ({
+  userIdIdx: index('idx_password_reset_tokens_user_id').on(table.userId),
+  expiresAtIdx: index('idx_password_reset_tokens_expires_at').on(table.expiresAt),
 }))
 
 export const gpgKeys = pgTable('gpg_keys', {
@@ -80,13 +115,16 @@ export const signatures = pgTable('signatures', {
   sourceCreatedAtIdx: index('idx_signatures_source_created_at').on(table.sourceType, table.createdAt.desc()),
 }))
 
-export const usersRelations = relations(users, ({ one, many }) => ({
-  profile: one(profiles, {
-    fields: [users.id],
-    references: [profiles.userId],
-  }),
+export const usersRelations = relations(users, ({ many, one }) => ({
+  profiles: many(profiles),
   signatures: many(signatures),
   gpgKeys: many(gpgKeys),
+  credential: one(authCredentials, {
+    fields: [users.id],
+    references: [authCredentials.userId],
+  }),
+  sessions: many(authSessions),
+  passwordResetTokens: many(passwordResetTokens),
 }))
 
 export const profilesRelations = relations(profiles, ({ one, many }) => ({
@@ -95,6 +133,32 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
     references: [users.id],
   }),
   signatures: many(signatures),
+  sessions: many(authSessions),
+}))
+
+export const authCredentialsRelations = relations(authCredentials, ({ one }) => ({
+  user: one(users, {
+    fields: [authCredentials.userId],
+    references: [users.id],
+  }),
+}))
+
+export const authSessionsRelations = relations(authSessions, ({ one }) => ({
+  user: one(users, {
+    fields: [authSessions.userId],
+    references: [users.id],
+  }),
+  profile: one(profiles, {
+    fields: [authSessions.profileId],
+    references: [profiles.id],
+  }),
+}))
+
+export const passwordResetTokensRelations = relations(passwordResetTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResetTokens.userId],
+    references: [users.id],
+  }),
 }))
 
 export const gpgKeysRelations = relations(gpgKeys, ({ one, many }) => ({

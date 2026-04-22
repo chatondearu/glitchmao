@@ -1,17 +1,16 @@
 import { z } from 'zod'
 import { desc, eq } from 'drizzle-orm'
 import { getDb } from '../utils/db'
-import { getCurrentProfile } from '../utils/current-user'
-import { getActiveSigningKey } from '../utils/gpg-keyring'
+import { requireWritePermission } from '../utils/permissions'
 import { resolveStorageProvider } from '../utils/storage'
 import { signHashWithSigner } from '../utils/signer-service'
+import { resolveActiveSigningContext } from '../utils/signing-context'
+import { createSignerAccessToken } from '../utils/signer-jwt'
 import { signatures } from '../db/schema'
 
 const bodySchema = z.object({
   content_hash: z.string().trim().length(64),
   creator_id: z.string().trim().min(1).optional(),
-  profile_id: z.string().uuid().optional(),
-  user_id: z.string().uuid().optional(),
   source_type: z.enum(['image', 'pdf', 'text', 'markdown', 'plain_text']).default('plain_text'),
   content_mime_type: z.string().trim().min(1).max(120).optional(),
   verification_url: z.string().trim().url().optional(),
@@ -25,6 +24,7 @@ function buildPublicId(contentHash: string, timestampMs: number) {
 }
 
 export default defineEventHandler(async (event) => {
+  await requireWritePermission(event)
   const body = await readBody(event)
   const parsed = bodySchema.safeParse(body)
 
@@ -36,10 +36,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const db = getDb()
-  const currentProfile = await getCurrentProfile()
-  if (!currentProfile) {
-    throw createError({ statusCode: 403, statusMessage: 'Onboarding is required before signing' })
-  }
+  const signingContext = await resolveActiveSigningContext(event)
 
   try {
     const [existing] = await db
@@ -87,32 +84,31 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const activeSigningKey = await getActiveSigningKey(currentProfile.userId)
-  if (!activeSigningKey) {
-    throw createError({ statusCode: 403, statusMessage: 'No active default GPG key available' })
-  }
-
   const runtimeStorageProvider = resolveStorageProvider()
-  const signingIdentity = activeSigningKey.fingerprint || activeSigningKey.keyId
-  if (!signingIdentity) {
-    throw createError({ statusCode: 500, statusMessage: 'No signing identity configured' })
-  }
+  const signerToken = createSignerAccessToken({
+    sub: signingContext.userId,
+    profile_id: signingContext.profileId,
+    allowed_fingerprint: signingContext.fingerprint,
+    scope: ['sign'],
+  })
 
-  const generatedSignature = await signHashWithSigner(parsed.data.content_hash, signingIdentity)
+  const generatedSignature = await signHashWithSigner(parsed.data.content_hash, signingContext.fingerprint, {
+    bearerToken: signerToken,
+  })
   const baseValues = {
     contentHash: parsed.data.content_hash,
     signature: generatedSignature,
-    creatorId: parsed.data.creator_id ?? currentProfile?.handle ?? 'anonymous',
-    userId: parsed.data.user_id ?? currentProfile?.userId ?? null,
-    profileId: parsed.data.profile_id ?? currentProfile?.profileId ?? null,
+    creatorId: parsed.data.creator_id ?? signingContext.handle ?? 'anonymous',
+    userId: signingContext.userId,
+    profileId: signingContext.profileId,
     sourceType: parsed.data.source_type,
     contentMimeType: parsed.data.content_mime_type ?? null,
     verificationUrl: parsed.data.verification_url ?? 'pending',
     status: parsed.data.status,
     storageProvider: parsed.data.storage_provider ?? runtimeStorageProvider,
     storageObjectUrl: parsed.data.storage_object_url ?? null,
-    signingKeyId: activeSigningKey.id,
-    signingKeyFingerprint: activeSigningKey.fingerprint,
+    signingKeyId: signingContext.signingKeyId,
+    signingKeyFingerprint: signingContext.fingerprint,
   }
 
   let created: { id: string, publicId: string } | undefined

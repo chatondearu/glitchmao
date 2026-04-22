@@ -60,20 +60,25 @@ async function completeOnboarding() {
 
 <template>
   <main class="mx-auto max-w-3xl px-4 py-10">
-    <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+    <UiCard>
+      <UiCardContent>
       <template v-if="step < slides.length">
-        <h1 class="text-2xl font-semibold">
-          {{ slides[step]?.title }}
-        </h1>
-        <p class="mt-3 text-slate-700">
-          {{ slides[step]?.text }}
-        </p>
+        <UiCardHeader>
+          <h1 class="text-2xl font-semibold">
+            {{ slides[step]?.title }}
+          </h1>
+          <p class="text-slate-700">
+            {{ slides[step]?.text }}
+          </p>
+        </UiCardHeader>
       </template>
 
       <template v-else-if="isProfileStep">
-        <h1 class="text-2xl font-semibold">
-          Creez votre profil principal
-        </h1>
+        <UiCardHeader>
+          <h1 class="text-2xl font-semibold">
+            Creez votre profil principal
+          </h1>
+        </UiCardHeader>
         <form class="mt-5 grid gap-4" @submit.prevent="nextStep">
           <UiFormField>
             <UiLabel for="display-name">
@@ -91,7 +96,7 @@ async function completeOnboarding() {
             <UiLabel for="bio">
               Bio (optionnel)
             </UiLabel>
-            <textarea id="bio" v-model="bio" class="min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+            <UiTextarea id="bio" v-model="bio" :rows="4" />
           </UiFormField>
           <UiFormField>
             <UiLabel for="avatar-url">
@@ -106,12 +111,14 @@ async function completeOnboarding() {
       </template>
 
       <template v-else-if="isConfirmStep">
-        <h1 class="text-2xl font-semibold">
-          Finaliser l onboarding
-        </h1>
-        <p class="mt-3 text-slate-700">
-          Une cle GPG par defaut va etre creee automatiquement pour votre profil.
-        </p>
+        <UiCardHeader>
+          <h1 class="text-2xl font-semibold">
+            Finaliser l onboarding
+          </h1>
+          <p class="text-slate-700">
+            Une cle GPG par defaut va etre creee automatiquement pour votre profil.
+          </p>
+        </UiCardHeader>
         <UiButton class="mt-6" :disabled="loading" @click="completeOnboarding">
           {{ loading ? 'Creation en cours...' : 'Terminer et creer ma cle' }}
         </UiButton>
@@ -129,6 +136,7 @@ async function completeOnboarding() {
           Suivant
         </UiButton>
       </div>
-    </div>
+      </UiCardContent>
+    </UiCard>
   </main>
 </template>

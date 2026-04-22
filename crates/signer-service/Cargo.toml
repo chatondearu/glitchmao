@@ -9,3 +9,4 @@ axum.workspace = true
 serde.workspace = true
 tokio.workspace = true
 crypto-core = { path = "../crypto-core" }
+jsonwebtoken.workspace = true

@@ -12,7 +12,7 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const current = await getCurrentProfile()
+  const current = await getCurrentProfile(event)
   if (!current) {
     throw createError({ statusCode: 404, statusMessage: 'No profile found' })
   }

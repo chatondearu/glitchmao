@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getCurrentProfile } from '../../../../utils/current-user'
 import { getDb } from '../../../../utils/db'
 import { compromiseKey } from '../../../../utils/gpg-keyring'
+import { requireKeyManagementPermission } from '../../../../utils/permissions'
 import { gpgKeys } from '../../../../db/schema'
 
 const bodySchema = z.object({
@@ -11,10 +12,10 @@ const bodySchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const current = await getCurrentProfile()
-  if (!current) {
+  await requireKeyManagementPermission(event)
+  const current = await getCurrentProfile(event)
+  if (!current)
     throw createError({ statusCode: 404, statusMessage: 'No profile found' })
-  }
 
   const keyId = getRouterParam(event, 'id')
   if (!keyId) {
