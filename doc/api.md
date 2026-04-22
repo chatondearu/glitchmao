@@ -49,12 +49,16 @@ curl -X POST "http://localhost:3000/api/verify" \
 Create a signature record from a hash.
 If the hash already exists, the API returns the existing signature (`status: "already_exists"`).
 
+Security behavior:
+
+- Requires authenticated session.
+- Uses active profile/signing context resolved server-side.
+- Owner fields are no longer accepted from client payload.
+
 Request body:
 
 - `content_hash` (required, 64 hex chars)
 - `creator_id` (optional)
-- `profile_id` (optional UUID)
-- `user_id` (optional UUID)
 - `source_type` (optional): `image|pdf|text|markdown|plain_text`
 - `content_mime_type` (optional)
 - `verification_url` (optional, absolute URL)
@@ -110,14 +114,25 @@ Query params:
 ## Profile endpoints
 
 - `GET /api/profile`: current profile
-- `POST /api/profile`: create profile/user
+- `POST /api/profile`: create profile for authenticated user
 - `PUT /api/profile`: update current profile
-- `GET /api/profiles`: list profiles for filters
+- `GET /api/profiles`: list profiles for the authenticated user
 
 ## Onboarding endpoints
 
 - `GET /api/onboarding/state`: onboarding readiness state
 - `POST /api/onboarding/complete`: complete onboarding, create/update profile, generate and set default signing key
+
+## Authentication endpoints
+
+- `POST /api/auth/register`: create account with password
+- `POST /api/auth/login`: sign in with handle/password
+- `POST /api/auth/logout`: sign out current session
+- `GET /api/auth/me`: current auth/session/profile summary
+- `POST /api/auth/switch-profile`: set active profile in session
+- `POST /api/auth/set-password`: set password for legacy authenticated account
+- `POST /api/auth/forgot-password/request`: request reset email by handle/email
+- `POST /api/auth/forgot-password/reset`: reset password using one-time token
 
 ## GPG key settings endpoints
 

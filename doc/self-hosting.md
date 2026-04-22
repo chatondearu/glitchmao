@@ -9,17 +9,26 @@ This guide explains how to run GlitchMao with Docker Compose for local developme
 
 ## Environment variables
 
-The web app reads runtime settings from environment variables:
+GlitchMao runtime variables are documented in the dedicated reference:
 
-- `DATABASE_URL`
-- `GPG_KEY_ID` (compatibility/bootstrap fallback)
-- `GPG_DEFAULT_KEY_NAME`
-- `GPG_DEFAULT_KEY_DOMAIN`
-- `SIGNER_SERVICE_URL`
-- `VERIFICATION_BASE_URL`
-- `STORAGE_PROVIDER`
-- `STORAGE_BUCKET`
-- `STORAGE_BASE_URL`
+- [Configuration reference](./configuration.md)
+
+Important security variables for app -> signer communication:
+
+- `SIGNER_SECURITY_MODE=secure|insecure_local`
+- `SIGNER_JWT_SECRET`
+- `SIGNER_JWT_TTL_SEC`
+- `SIGNER_INSECURE_BIND`
+
+Important email variables for password reset:
+
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM`
+- `PASSWORD_RESET_BASE_URL`
 
 Copy the example file before starting local runs:
 
@@ -46,6 +55,7 @@ Startup behavior:
 - The web container installs dependencies
 - SQL migrations are applied with `npm run db:migrate:sql --prefix apps/web-nuxt`
 - Nuxt starts in development mode
+- `web-migrations` watches `infra/db/migrations/*.sql` and reapplies SQL migrations automatically
 
 ### Production-like stack
 
@@ -77,3 +87,5 @@ The `web-test` service runs:
 - The web service never mounts signer keyring storage.
 - `SIGNER_SERVICE_URL` should target the signer service endpoint reachable from `web`.
 - `VERIFICATION_BASE_URL` should be set to your public URL in self-hosted production.
+- In `secure` mode, signer requests are authorized with short-lived JWT delegation from the web API.
+- `insecure_local` mode is intended for standalone local CLI usage only and must bind to localhost.

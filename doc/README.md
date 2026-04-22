@@ -6,6 +6,7 @@ This documentation focuses on operating the stack and integrating with its publi
 ## Documentation map
 
 - [Self-hosting guide](./self-hosting.md): run GlitchMao in development, production-like mode, and test mode.
+- [Configuration reference](./configuration.md): environment variables for app, signer security, SMTP, and compose overlays.
 - [API reference](./api.md): web API endpoints, payloads, and examples.
 - [CLI reference](./cli.md): `glitchmao` command usage and examples.
 

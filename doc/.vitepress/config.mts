@@ -9,6 +9,7 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Self-host', link: '/self-hosting' },
+      { text: 'Configuration', link: '/configuration' },
       { text: 'API', link: '/api' },
       { text: 'CLI', link: '/cli' },
     ],
@@ -18,6 +19,7 @@ export default defineConfig({
         items: [
           { text: 'Documentation index', link: '/' },
           { text: 'Self-hosting', link: '/self-hosting' },
+          { text: 'Configuration', link: '/configuration' },
           { text: 'API reference', link: '/api' },
           { text: 'CLI reference', link: '/cli' },
         ],
