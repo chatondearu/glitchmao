@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const route = useRoute()
-const { t, locale, setLocale } = useI18n()
+const { locale, setLocale } = useI18n({ useScope: 'global' })
+const { t } = useI18n({ useScope: 'local' })
 const onboardingRequired = useState<boolean>('onboarding-required', () => false)
 const { theme, toggleTheme, hydrateTheme } = useTheme()
 const profileOptions = ref<Array<{ profileId: string, handle: string, displayName: string, locale: 'fr' | 'en' }>>([])
@@ -10,14 +11,14 @@ const authState = ref<{
   activeProfileId?: string | null
   activeProfileLocale?: 'fr' | 'en' | null
 }>({ authenticated: false })
-const language = ref<'fr' | 'en'>('fr')
-const navItems = computed(() => [
-  { to: '/', label: t('nav.verify') },
-  { to: '/signatures/new', label: t('nav.create') },
-  { to: '/signatures', label: t('nav.signatures') },
-  { to: '/profile', label: t('nav.profile') },
-  { to: '/settings', label: t('nav.settings') },
-])
+const language = ref<'fr' | 'en'>(locale.value as 'fr' | 'en')
+const navItems = [
+  { to: '/', labelKey: 'nav.verify' },
+  { to: '/signatures/new', labelKey: 'nav.create' },
+  { to: '/signatures', labelKey: 'nav.signatures' },
+  { to: '/profile', labelKey: 'nav.profile' },
+  { to: '/settings', labelKey: 'nav.settings' },
+]
 
 async function refreshAuth() {
   authState.value = await $fetch('/api/auth/me').catch(() => ({ authenticated: false }))
@@ -66,6 +67,10 @@ async function applyLocale(nextLocale: 'fr' | 'en', syncProfile = true) {
     body: { locale: nextLocale },
   }).catch(() => {})
 }
+
+watch(locale, (value) => {
+  language.value = value as 'fr' | 'en'
+})
 
 onMounted(async () => {
   hydrateTheme()
@@ -125,7 +130,7 @@ onMounted(async () => {
             :class="route.path === item.to ? 'border-primary-container bg-primary-container text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'"
           >
             <span v-if="index > 0" class="ui-meta-mono text-[10px] opacity-70">&gt;</span>
-            {{ item.label }}
+            {{ t(item.labelKey) }}
           </NuxtLink>
         </nav>
       </div>
@@ -133,3 +138,32 @@ onMounted(async () => {
     <slot />
   </div>
 </template>
+
+<i18n lang="json">
+{
+  "fr": {
+    "nav": {
+      "verify": "Verifier",
+      "create": "Creer",
+      "signatures": "Signatures",
+      "profile": "Profil",
+      "settings": "Parametres",
+      "logout": "Deconnexion",
+      "themeDark": "Mode sombre",
+      "themeLight": "Mode clair"
+    }
+  },
+  "en": {
+    "nav": {
+      "verify": "Verify",
+      "create": "Create",
+      "signatures": "Signatures",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout",
+      "themeDark": "Dark mode",
+      "themeLight": "Light mode"
+    }
+  }
+}
+</i18n>
