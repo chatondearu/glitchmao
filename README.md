@@ -210,6 +210,10 @@ Set `GPG_KEY_ID` in `.env` to the generated key ID or email.
 ### Environment variables used
 
 - `DATABASE_URL`
+- `SIGNER_SECURITY_MODE`
+- `SIGNER_JWT_SECRET`
+- `SIGNER_JWT_TTL_SEC`
+- `SIGNER_INSECURE_BIND`
 - `GPG_KEY_ID` (compatibility/bootstrap fallback; not the primary key source after onboarding)
 - `GPG_HOME`
 - `GPG_DEFAULT_KEY_NAME`
@@ -219,6 +223,15 @@ Set `GPG_KEY_ID` in `.env` to the generated key ID or email.
 - `STORAGE_PROVIDER`
 - `STORAGE_BUCKET`
 - `STORAGE_BASE_URL`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USER`
+- `SMTP_PASS`
+- `SMTP_FROM`
+- `PASSWORD_RESET_BASE_URL`
+
+For complete env documentation and Docker-specific overlays, see [doc/configuration.md](doc/configuration.md).
 
 ## Conventional Commits
 

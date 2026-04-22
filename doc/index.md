@@ -30,6 +30,7 @@ features:
 ## Quick navigation
 
 - [Self-hosting](./self-hosting.md): deployment topology, env vars, and Docker Compose modes.
+- [Configuration](./configuration.md): environment variables including signer JWT security and SMTP/password reset.
 - [API reference](./api.md): endpoints, payloads, and response examples.
 - [CLI reference](./cli.md): `glitchmao` command usage and examples.
 
