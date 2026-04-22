@@ -1,6 +1,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2026-04-20',
   devtools: { enabled: true },
+  css: ['@unocss/reset/tailwind.css', '~/assets/main.css'],
   modules: [
     '@unocss/nuxt',
     'reka-ui/nuxt',

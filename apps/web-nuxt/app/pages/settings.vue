@@ -96,21 +96,21 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-4xl px-4 py-8">
-    <h1 class="text-2xl font-semibold">
+  <main class="ui-container py-8">
+    <h1 class="text-headline-md font-semibold">
       Settings - Cles GPG
     </h1>
-    <p class="mt-2 text-sm text-slate-600">
+    <p class="mt-2 text-body-md text-on-surface-variant">
       Vous pouvez definir la cle active par defaut et signaler une cle compromise.
     </p>
 
-    <UiCard v-if="!hasPassword" class="mt-5 border-amber-300 bg-amber-50">
+    <UiCard v-if="!hasPassword" class="mt-5 border-primary-container bg-surface-container-high">
       <UiCardContent>
         <UiCardHeader>
-          <h2 class="text-base font-semibold text-slate-900">
+          <h2 class="text-body-lg font-semibold text-on-surface">
             Compte legacy - definir un mot de passe
           </h2>
-          <p class="text-sm text-slate-700">
+          <p class="text-body-md text-on-surface-variant">
             Ce compte n'a pas encore de mot de passe. Configurez-le pour activer la connexion classique.
           </p>
         </UiCardHeader>
@@ -118,23 +118,23 @@ onMounted(async () => {
           <UiInput v-model="email" type="email" name="legacy-email" placeholder="email" />
           <UiInput v-model="newPassword" type="password" name="legacy-password" placeholder="nouveau mot de passe" />
           <UiInput v-model="confirmPassword" type="password" name="legacy-password-confirm" placeholder="confirmer le mot de passe" />
-          <p class="text-xs text-slate-600">
+          <p class="ui-meta-mono">
             Regle mot de passe: {{ PASSWORD_MIN_LENGTH }} a {{ PASSWORD_MAX_LENGTH }} caracteres.
           </p>
           <UiButton type="button" @click="configurePassword">
             Configurer le mot de passe
           </UiButton>
         </div>
-        <p v-if="authSuccess" class="mt-2 text-sm text-emerald-700">
+        <p v-if="authSuccess" class="ui-meta-mono mt-2 text-primary">
           {{ authSuccess }}
         </p>
-        <p v-if="authError" class="mt-2 text-sm text-red-700">
+        <p v-if="authError" class="ui-meta-mono mt-2 text-error">
           {{ authError }}
         </p>
       </UiCardContent>
     </UiCard>
 
-    <p v-if="error" class="mt-4 text-sm font-medium text-red-700">
+    <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
     </p>
 
@@ -150,15 +150,15 @@ onMounted(async () => {
               <p class="font-medium">
                 {{ key.fingerprint }}
               </p>
-              <p class="text-xs text-slate-600">
+              <p class="ui-meta-mono">
                 Key ID: {{ key.keyId || 'N/A' }} - Algo: {{ key.algorithm || 'N/A' }}
               </p>
             </div>
             <div class="flex items-center gap-2">
-              <span class="rounded px-2 py-1 text-xs" :class="key.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'">
+              <span class="px-2 py-1 text-label-caps" :class="key.status === 'active' ? 'bg-primary-container text-on-primary' : 'bg-error-container text-on-error-container'">
                 {{ key.status }}
               </span>
-              <span v-if="key.isDefault" class="rounded bg-slate-200 px-2 py-1 text-xs text-slate-800">
+              <span v-if="key.isDefault" class="bg-surface-bright px-2 py-1 text-label-caps text-on-surface">
                 default
               </span>
             </div>

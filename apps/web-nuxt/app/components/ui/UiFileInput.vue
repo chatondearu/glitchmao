@@ -34,7 +34,7 @@ function onChange(event: Event) {
     :accept="props.accept"
     :required="props.required"
     :disabled="props.disabled"
-    class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 disabled:cursor-not-allowed disabled:bg-slate-100"
+    class="ui-input-base file:mr-3 file:border-0 file:bg-primary-container file:px-3 file:py-1 file:text-xs file:font-semibold file:uppercase file:tracking-[0.08em] file:text-on-primary hover:file:opacity-85"
     @change="onChange"
   >
 </template>

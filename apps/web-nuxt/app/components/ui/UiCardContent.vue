@@ -1,5 +1,5 @@
 <template>
-  <div class="p-5">
+  <div class="ui-card-content">
     <slot />
   </div>
 </template>

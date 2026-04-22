@@ -11,7 +11,7 @@ const props = defineProps<Props>()
 <template>
   <Label
     :for="props.for"
-    class="text-sm font-medium text-slate-800"
+    class="ui-label-caps"
   >
     <slot />
   </Label>

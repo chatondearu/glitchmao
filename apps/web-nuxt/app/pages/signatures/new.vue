@@ -73,8 +73,8 @@ async function copyVerificationLink() {
 </script>
 
 <template>
-  <main class="mx-auto max-w-3xl px-4 py-8">
-    <h1 class="text-2xl font-semibold">
+  <main class="ui-container max-w-4xl py-8">
+    <h1 class="text-headline-md font-semibold">
       Creer une signature
     </h1>
     <UiCard as="form" class="mt-6" @submit.prevent="submitSignature">
@@ -152,26 +152,26 @@ async function copyVerificationLink() {
 
     <p
       v-if="result"
-      class="mt-4 text-sm font-medium"
-      :class="result.status === 'already_exists' ? 'text-amber-700' : 'text-emerald-700'"
+      class="ui-meta-mono mt-4"
+      :class="result.status === 'already_exists' ? 'text-on-surface-variant' : 'text-primary'"
     >
       {{ result.status === 'already_exists' ? `Signature deja existante (ID: ${result.id}).` : `Signature enregistree avec succes (ID: ${result.id}).` }}
     </p>
-    <div v-if="verificationLink" class="mt-3 flex flex-col gap-2 rounded-md border border-slate-200 bg-white p-3 sm:flex-row sm:items-center">
-      <p class="min-w-0 flex-1 truncate text-xs text-slate-700">
+    <div v-if="verificationLink" class="mt-3 flex flex-col gap-2 border border-outline-variant bg-surface-container p-3 sm:flex-row sm:items-center">
+      <p class="ui-meta-mono min-w-0 flex-1 truncate">
         {{ verificationLink }}
       </p>
       <UiButton type="button" variant="secondary" @click="copyVerificationLink">
         Copier le lien de verification
       </UiButton>
     </div>
-    <p v-if="copyStatus === 'success'" class="mt-2 text-sm font-medium text-emerald-700">
+    <p v-if="copyStatus === 'success'" class="ui-meta-mono mt-2 text-primary">
       Lien de verification copie.
     </p>
-    <p v-else-if="copyStatus === 'error'" class="mt-2 text-sm font-medium text-red-700">
+    <p v-else-if="copyStatus === 'error'" class="ui-meta-mono mt-2 text-error">
       Impossible de copier automatiquement. Copiez le lien manuellement.
     </p>
-    <p v-if="error" class="mt-4 text-sm font-medium text-red-700">
+    <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
     </p>
   </main>

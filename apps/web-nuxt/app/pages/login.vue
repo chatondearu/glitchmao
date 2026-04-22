@@ -68,14 +68,14 @@ async function requestPasswordReset() {
 </script>
 
 <template>
-  <main class="mx-auto max-w-md px-4 py-10">
+  <main class="ui-container max-w-2xl py-10">
     <UiCard as="form" class="mt-6" @submit.prevent="submit">
       <UiCardContent>
         <UiCardHeader>
-          <h1 class="text-2xl font-semibold">
+          <h1 class="text-headline-md font-semibold">
             {{ mode === 'login' ? 'Connexion' : 'Creer un compte' }}
           </h1>
-          <p class="text-sm text-slate-600">
+          <p class="text-body-md text-on-surface-variant">
             Authentifiez-vous pour acceder aux signatures et aux profils.
           </p>
         </UiCardHeader>
@@ -107,7 +107,7 @@ async function requestPasswordReset() {
               Mot de passe
             </UiLabel>
             <UiInput id="password" v-model="password" type="password" name="password" required />
-            <p class="mt-1 text-xs text-slate-600">
+            <p class="ui-meta-mono mt-1">
               {{ PASSWORD_MIN_LENGTH }} a {{ PASSWORD_MAX_LENGTH }} caracteres.
             </p>
           </UiFormField>
@@ -129,17 +129,17 @@ async function requestPasswordReset() {
       {{ mode === 'login' ? 'Pas de compte ? Inscription' : 'Deja un compte ? Connexion' }}
     </UiButton>
 
-    <p v-if="error" class="mt-4 text-sm font-medium text-red-700">
+    <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
     </p>
 
     <UiCard v-if="mode === 'login'" class="mt-8">
       <UiCardContent>
         <UiCardHeader>
-          <p class="text-sm font-medium text-slate-900">
+          <p class="text-body-md font-semibold text-on-surface">
             Mot de passe oublie
           </p>
-          <p class="text-xs text-slate-600">
+          <p class="ui-meta-mono">
             Saisis ton handle ou ton e-mail pour recevoir un lien de reinitialisation.
           </p>
         </UiCardHeader>
@@ -149,7 +149,7 @@ async function requestPasswordReset() {
             Envoyer
           </UiButton>
         </div>
-        <p v-if="forgotSuccess" class="mt-2 text-xs text-emerald-700">
+        <p v-if="forgotSuccess" class="ui-meta-mono mt-2 text-primary">
           {{ forgotSuccess }}
         </p>
       </UiCardContent>

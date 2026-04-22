@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<Props>(), {
 <template>
   <component
     :is="props.as"
-    class="rounded-lg border border-slate-200 bg-white shadow-sm"
+    class="ui-card"
   >
     <slot />
   </component>

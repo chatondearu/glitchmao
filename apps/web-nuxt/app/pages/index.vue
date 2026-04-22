@@ -54,11 +54,11 @@ async function verifyByFile() {
 </script>
 
 <template>
-  <main class="mx-auto max-w-2xl px-4 py-12">
+  <main class="ui-container max-w-3xl py-12">
     <UiCard as="form" class="mt-6" @submit.prevent="verifyByHash">
       <UiCardContent>
         <UiCardHeader>
-          <h1 class="text-2xl font-semibold text-slate-900">
+          <h1 class="text-headline-md font-semibold text-on-surface">
             GlitchMao Verification
           </h1>
         </UiCardHeader>
@@ -103,10 +103,10 @@ async function verifyByFile() {
       </UiCardContent>
     </UiCard>
 
-    <p v-if="result" class="mt-5 text-sm font-medium" :class="result.status === 'AUTHENTIQUE' ? 'text-emerald-700' : 'text-red-700'">
+    <p v-if="result" class="ui-meta-mono mt-5" :class="result.status === 'AUTHENTIQUE' ? 'text-primary' : 'text-error'">
       {{ result.status }} - {{ result.details }}
     </p>
-    <p v-if="error" class="mt-5 text-sm font-medium text-red-700">
+    <p v-if="error" class="ui-meta-mono mt-5 text-error">
       {{ error }}
     </p>
   </main>
