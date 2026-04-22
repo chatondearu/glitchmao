@@ -12,16 +12,16 @@ const authState = ref<{
   activeProfileLocale?: 'fr' | 'en' | null
 }>({ authenticated: false })
 const language = ref<'fr' | 'en'>(locale.value as 'fr' | 'en')
+// Primary nav: verify -> create -> list signatures
 const navItems = [
   { to: '/', labelKey: 'nav.verify' },
   { to: '/signatures/new', labelKey: 'nav.create' },
   { to: '/signatures', labelKey: 'nav.signatures' },
-  { to: '/settings/profile', labelKey: 'nav.settings', activePrefix: '/settings' },
 ] as const
 
+const navLinkClass = 'flex h-9 items-center whitespace-nowrap rounded-sm px-3 text-label-caps transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container/60'
+
 function isNavItemActive(item: (typeof navItems)[number]) {
-  if ('activePrefix' in item)
-    return route.path === item.to || route.path.startsWith(`${item.activePrefix}/`)
   return route.path === item.to
 }
 
@@ -93,51 +93,110 @@ onMounted(async () => {
 <template>
   <div class="ui-page min-h-screen flex flex-col">
     <header class="border-b-2 border-outline-variant bg-surface-container-low">
-      <div class="ui-container flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <NuxtLink to="/" class="text-headline-md font-semibold text-on-surface">
+      <div class="ui-container flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between md:gap-4">
+        <NuxtLink to="/" class="shrink-0 text-headline-md font-semibold text-on-surface">
           GlitchMao
         </NuxtLink>
-        <div class="flex items-center gap-2">
+        <div
+          v-if="authState.authenticated"
+          class="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 md:justify-end md:gap-3"
+        >
+          <nav
+            v-if="(!onboardingRequired || route.path === '/onboarding')"
+            class="flex min-w-0 flex-wrap items-center justify-end"
+            aria-label="Primary"
+          >
+            <div class="flex items-center gap-0.5 rounded-sm border border-outline-variant bg-surface-container p-1">
+              <NuxtLink
+                v-for="item in navItems"
+                :key="item.to"
+                :to="item.to"
+                :aria-current="isNavItemActive(item) ? 'page' : undefined"
+                :class="[
+                  navLinkClass,
+                  isNavItemActive(item)
+                    ? 'bg-primary-container text-on-primary'
+                    : 'text-on-surface hover:bg-surface-container-high',
+                ]"
+              >
+                {{ t(item.labelKey) }}
+              </NuxtLink>
+            </div>
+          </nav>
           <UiSelect
-            :model-value="language"
-            class="w-auto min-w-28"
-            @update:model-value="(value) => applyLocale(value as 'fr' | 'en')"
+            v-if="profileOptions.length > 1"
+            :model-value="authState.activeProfileId ?? ''"
+            class="h-9 w-auto min-w-[12rem] max-w-[min(100%,20rem)] shrink-0"
+            @update:model-value="onProfileSelect"
           >
-            <option value="fr">FR</option>
-            <option value="en">EN</option>
+            <option v-for="item in profileOptions" :key="item.profileId" :value="item.profileId">
+              {{ item.displayName }} (@{{ item.handle }})
+            </option>
           </UiSelect>
-          <UiButton type="button" variant="ghost" size="sm" @click="toggleTheme">
-            {{ theme === 'dark' ? t('nav.themeLight') : t('nav.themeDark') }}
-          </UiButton>
-          <template v-if="authState.authenticated">
-            <span class="ui-meta-mono">{{ authState.user?.displayName }}</span>
-            <UiSelect
-              v-if="profileOptions.length > 1"
-              :model-value="authState.activeProfileId ?? ''"
-              class="w-auto min-w-52"
-              @update:model-value="onProfileSelect"
-            >
-              <option v-for="item in profileOptions" :key="item.profileId" :value="item.profileId">
-                {{ item.displayName }} (@{{ item.handle }})
-              </option>
-            </UiSelect>
-            <UiButton type="button" variant="secondary" size="sm" @click="logout">
-              {{ t('nav.logout') }}
-            </UiButton>
-          </template>
+          <UiFloatingDropdown placement="bottom-end">
+            <template #trigger="{ open, toggle }">
+              <UiButton
+                type="button"
+                variant="ghost"
+                size="sm"
+                class="h-9 max-w-[min(100%,14rem)] shrink-0 gap-1 border border-outline-variant bg-surface-container px-3 hover:bg-surface-container-high"
+                :aria-expanded="open"
+                aria-haspopup="menu"
+                :aria-label="t('userMenu.openMenuAria')"
+                @click="toggle"
+              >
+                <span class="truncate">
+                  {{ authState.user?.displayName?.trim() || t('userMenu.accountFallback') }}
+                </span>
+                <span class="ui-meta-mono text-[10px] opacity-70" aria-hidden="true">▾</span>
+              </UiButton>
+            </template>
+            <template #default="{ close }">
+              <div class="flex min-w-[min(100vw-2rem,17.5rem)] flex-col gap-1 px-2 py-1">
+                <NuxtLink
+                  to="/settings/profile"
+                  class="flex h-9 items-center rounded-sm px-2 text-left text-label-caps text-on-surface transition hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container/60"
+                  role="menuitem"
+                  @click="close"
+                >
+                  {{ t('nav.settings') }}
+                </NuxtLink>
+                <div class="flex flex-col gap-1 px-2 pb-1 pt-2">
+                  <span class="ui-meta-mono text-[10px] uppercase tracking-wider text-on-surface-variant">
+                    {{ t('nav.language') }}
+                  </span>
+                  <UiSelect
+                    :model-value="language"
+                    class="h-9 w-full min-w-0"
+                    @update:model-value="(value) => applyLocale(value as 'fr' | 'en')"
+                  >
+                    <option value="fr">FR</option>
+                    <option value="en">EN</option>
+                  </UiSelect>
+                </div>
+                <UiButton
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  class="h-9 w-full justify-start px-2 font-normal"
+                  @click="toggleTheme"
+                >
+                  {{ theme === 'dark' ? t('nav.themeLight') : t('nav.themeDark') }}
+                </UiButton>
+                <div class="my-2 border-t border-outline-variant" role="presentation" />
+                <UiButton
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  class="h-9 w-full justify-start px-2 text-error hover:bg-error-container/15"
+                  @click="() => { close(); void logout() }"
+                >
+                  {{ t('nav.logout') }}
+                </UiButton>
+              </div>
+            </template>
+          </UiFloatingDropdown>
         </div>
-        <nav v-if="(!onboardingRequired || route.path === '/onboarding') && authState.authenticated" class="flex flex-wrap items-center gap-2">
-          <NuxtLink
-            v-for="(item, index) in navItems"
-            :key="item.to"
-            :to="item.to"
-            class="inline-flex items-center gap-2 border border-outline-variant px-3 py-2 text-label-caps transition"
-            :class="isNavItemActive(item) ? 'border-primary-container bg-primary-container text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'"
-          >
-            <span v-if="index > 0" class="ui-meta-mono text-[10px] opacity-70">&gt;</span>
-            {{ t(item.labelKey) }}
-          </NuxtLink>
-        </nav>
       </div>
     </header>
     <main class="flex-1">
@@ -175,9 +234,14 @@ onMounted(async () => {
       "signatures": "Signatures",
       "profile": "Profil",
       "settings": "Parametres",
+      "language": "Langue",
       "logout": "Deconnexion",
       "themeDark": "Mode sombre",
       "themeLight": "Mode clair"
+    },
+    "userMenu": {
+      "openMenuAria": "Ouvrir le menu compte",
+      "accountFallback": "Compte"
     }
   },
   "en": {
@@ -192,9 +256,14 @@ onMounted(async () => {
       "signatures": "Signatures",
       "profile": "Profile",
       "settings": "Settings",
+      "language": "Language",
       "logout": "Logout",
       "themeDark": "Dark mode",
       "themeLight": "Light mode"
+    },
+    "userMenu": {
+      "openMenuAria": "Open account menu",
+      "accountFallback": "Account"
     }
   }
 }
