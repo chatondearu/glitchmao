@@ -102,7 +102,8 @@ struct HealthResponse {
 async fn main() {
     let host = env::var("SIGNER_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
     let security_mode = parse_security_mode();
-    let insecure_bind = env::var("SIGNER_INSECURE_BIND").unwrap_or_else(|_| "127.0.0.1".to_string());
+    let insecure_bind =
+        env::var("SIGNER_INSECURE_BIND").unwrap_or_else(|_| "127.0.0.1".to_string());
     let port = env::var("SIGNER_PORT")
         .ok()
         .and_then(|value| value.parse::<u16>().ok())
@@ -297,7 +298,9 @@ fn validate_bootstrap(
             if !is_local_host(insecure_bind) {
                 panic!("SIGNER_INSECURE_BIND must be local in insecure_local mode");
             }
-            eprintln!("WARNING: signer-service started in insecure_local mode; API auth is disabled");
+            eprintln!(
+                "WARNING: signer-service started in insecure_local mode; API auth is disabled"
+            );
         }
     }
 }
