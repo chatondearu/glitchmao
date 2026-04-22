@@ -46,11 +46,11 @@ async function resetPassword() {
 </script>
 
 <template>
-  <main class="mx-auto max-w-md px-4 py-10">
+  <main class="ui-container max-w-2xl py-10">
     <UiCard as="form" class="mt-6" @submit.prevent="resetPassword">
       <UiCardContent>
         <UiCardHeader>
-          <h1 class="text-2xl font-semibold">
+          <h1 class="text-headline-md font-semibold">
             Reinitialisation du mot de passe
           </h1>
         </UiCardHeader>
@@ -60,7 +60,7 @@ async function resetPassword() {
               Nouveau mot de passe
             </UiLabel>
             <UiInput id="new-password" v-model="password" type="password" name="new-password" required />
-            <p class="mt-1 text-xs text-slate-600">
+            <p class="ui-meta-mono mt-1">
               {{ PASSWORD_MIN_LENGTH }} a {{ PASSWORD_MAX_LENGTH }} caracteres.
             </p>
           </UiFormField>
@@ -76,10 +76,10 @@ async function resetPassword() {
         </div>
       </UiCardContent>
     </UiCard>
-    <p v-if="success" class="mt-4 text-sm font-medium text-emerald-700">
+    <p v-if="success" class="ui-meta-mono mt-4 text-primary">
       {{ success }}
     </p>
-    <p v-if="error" class="mt-4 text-sm font-medium text-red-700">
+    <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
     </p>
   </main>

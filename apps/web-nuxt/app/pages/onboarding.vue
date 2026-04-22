@@ -59,15 +59,15 @@ async function completeOnboarding() {
 </script>
 
 <template>
-  <main class="mx-auto max-w-3xl px-4 py-10">
+  <main class="ui-container max-w-4xl py-10">
     <UiCard>
       <UiCardContent>
       <template v-if="step < slides.length">
         <UiCardHeader>
-          <h1 class="text-2xl font-semibold">
+          <h1 class="text-headline-md font-semibold">
             {{ slides[step]?.title }}
           </h1>
-          <p class="text-slate-700">
+          <p class="text-body-md text-on-surface-variant">
             {{ slides[step]?.text }}
           </p>
         </UiCardHeader>
@@ -75,7 +75,7 @@ async function completeOnboarding() {
 
       <template v-else-if="isProfileStep">
         <UiCardHeader>
-          <h1 class="text-2xl font-semibold">
+          <h1 class="text-headline-md font-semibold">
             Creez votre profil principal
           </h1>
         </UiCardHeader>
@@ -112,10 +112,10 @@ async function completeOnboarding() {
 
       <template v-else-if="isConfirmStep">
         <UiCardHeader>
-          <h1 class="text-2xl font-semibold">
+          <h1 class="text-headline-md font-semibold">
             Finaliser l onboarding
           </h1>
-          <p class="text-slate-700">
+          <p class="text-body-md text-on-surface-variant">
             Une cle GPG par defaut va etre creee automatiquement pour votre profil.
           </p>
         </UiCardHeader>
@@ -124,7 +124,7 @@ async function completeOnboarding() {
         </UiButton>
       </template>
 
-      <p v-if="error" class="mt-4 text-sm font-medium text-red-700">
+      <p v-if="error" class="ui-meta-mono mt-4 text-error">
         {{ error }}
       </p>
 

@@ -35,7 +35,7 @@ function onInput(event: Event) {
     :placeholder="props.placeholder"
     :required="props.required"
     :disabled="props.disabled"
-    class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus-visible:border-brand-500 focus-visible:ring-2 focus-visible:ring-brand-200 disabled:cursor-not-allowed disabled:bg-slate-100"
+    class="ui-input-base placeholder:text-on-surface-variant/70"
     @input="onInput"
   >
 </template>

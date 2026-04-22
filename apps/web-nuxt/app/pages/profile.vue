@@ -72,11 +72,11 @@ onMounted(loadProfile)
 </script>
 
 <template>
-  <main class="mx-auto max-w-3xl px-4 py-8">
-    <h1 class="text-2xl font-semibold">
+  <main class="ui-container max-w-4xl py-8">
+    <h1 class="text-headline-md font-semibold">
       Profil
     </h1>
-    <p class="mt-2 text-sm text-slate-600">
+    <p class="mt-2 text-body-md text-on-surface-variant">
       {{ profile ? 'Editez votre profil principal.' : 'Creez votre profil principal pour commencer.' }}
     </p>
 
@@ -125,10 +125,10 @@ onMounted(loadProfile)
       </UiCardContent>
     </UiCard>
 
-    <p v-if="success" class="mt-4 text-sm font-medium text-emerald-700">
+    <p v-if="success" class="ui-meta-mono mt-4 text-primary">
       {{ success }}
     </p>
-    <p v-if="error" class="mt-4 text-sm font-medium text-red-700">
+    <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
     </p>
   </main>

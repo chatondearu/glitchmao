@@ -110,13 +110,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-5xl px-4 py-8">
+  <main class="ui-container py-8">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 class="text-2xl font-semibold">
+        <h1 class="text-headline-md font-semibold">
           Signatures
         </h1>
-        <p class="mt-1 text-sm text-slate-600">
+        <p class="mt-1 text-body-md text-on-surface-variant">
           Liste des signatures creees, filtrable par type et periode.
         </p>
       </div>
@@ -184,19 +184,19 @@ onMounted(async () => {
       </UiCardContent>
     </UiCard>
 
-    <p v-if="loading" class="mt-4 text-sm text-slate-600">
+    <p v-if="loading" class="ui-meta-mono mt-4">
       Chargement...
     </p>
-    <p v-if="error" class="mt-4 text-sm font-medium text-red-700">
+    <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
     </p>
-    <p v-if="copyError" class="mt-2 text-sm font-medium text-amber-700">
+    <p v-if="copyError" class="ui-meta-mono mt-2 text-primary-container">
       {{ copyError }}
     </p>
 
     <UiCard v-if="!loading" class="mt-4 overflow-x-auto">
-      <table class="min-w-full text-sm">
-        <thead class="bg-slate-100 text-left text-slate-700">
+      <table class="min-w-full text-body-md">
+        <thead class="bg-surface-container-high text-left text-label-caps text-on-surface-variant">
           <tr>
             <th class="px-3 py-2">
               Date
@@ -219,7 +219,7 @@ onMounted(async () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="item in items" :key="item.id" class="border-t border-slate-100">
+          <tr v-for="item in items" :key="item.id" class="border-t border-outline-variant">
             <td class="px-3 py-2 whitespace-nowrap">
               {{ new Date(item.createdAt).toLocaleString() }}
             </td>
@@ -230,11 +230,11 @@ onMounted(async () => {
               {{ item.displayName ?? item.handle ?? item.creatorId }}
             </td>
             <td class="px-3 py-2">
-              <span :class="item.status === 'AUTHENTIQUE' ? 'text-emerald-700' : 'text-red-700'">
+              <span :class="item.status === 'AUTHENTIQUE' ? 'text-primary' : 'text-error'">
                 {{ item.status }}
               </span>
             </td>
-            <td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
+            <td class="px-3 py-2 font-mono text-label-mono whitespace-nowrap">
               <div class="flex items-center gap-2">
                 <UiButton
                   type="button"
@@ -246,17 +246,17 @@ onMounted(async () => {
                 >
                   {{ item.id }}
                 </UiButton>
-                <UiButton type="button" variant="secondary" class="px-2 py-1 text-xs" @click="copyPublicId(item.id)">
+                <UiButton type="button" variant="secondary" size="sm" class="px-2 py-1 text-xs" @click="copyPublicId(item.id)">
                   {{ copiedPublicId === item.id ? 'Copie' : 'Copier' }}
                 </UiButton>
               </div>
             </td>
-            <td class="px-3 py-2 font-mono text-xs">
+            <td class="px-3 py-2 font-mono text-label-mono">
               {{ item.contentHash.slice(0, 16) }}...
             </td>
           </tr>
           <tr v-if="items.length === 0">
-            <td colspan="6" class="px-3 py-6 text-center text-slate-500">
+            <td colspan="6" class="px-3 py-6 text-center text-on-surface-variant">
               Aucune signature.
             </td>
           </tr>

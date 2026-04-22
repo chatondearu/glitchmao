@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<Props>(), {
     <slot />
     <p
       v-if="props.error"
-      class="text-sm text-red-700"
+      class="text-label-mono text-error uppercase"
       role="alert"
     >
       {{ props.error }}
