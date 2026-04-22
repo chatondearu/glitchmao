@@ -55,46 +55,53 @@ async function verifyByFile() {
 
 <template>
   <main class="mx-auto max-w-2xl px-4 py-12">
-    <h1 class="text-2xl font-semibold text-slate-900">
-      GlitchMao Verification
-    </h1>
+    <UiCard as="form" class="mt-6" @submit.prevent="verifyByHash">
+      <UiCardContent>
+        <UiCardHeader>
+          <h1 class="text-2xl font-semibold text-slate-900">
+            GlitchMao Verification
+          </h1>
+        </UiCardHeader>
+        <div class="mt-4 grid gap-4">
+          <UiFormField>
+            <UiLabel for="hash-input">
+              SHA-256 Hash
+            </UiLabel>
+            <UiInput
+              id="hash-input"
+              v-model="hash"
+              type="text"
+              name="hash"
+              placeholder="Paste content hash"
+              required
+            />
+          </UiFormField>
+          <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
+            {{ loadingHash ? 'Verification...' : 'Verifier par hash' }}
+          </UiButton>
+        </div>
+      </UiCardContent>
+    </UiCard>
 
-    <form class="mt-6 grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm" @submit.prevent="verifyByHash">
-      <UiFormField>
-        <UiLabel for="hash-input">
-          SHA-256 Hash
-        </UiLabel>
-        <UiInput
-        id="hash-input"
-        v-model="hash"
-        type="text"
-        name="hash"
-        placeholder="Paste content hash"
-        required
-        />
-      </UiFormField>
-      <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
-        {{ loadingHash ? 'Verification...' : 'Verifier par hash' }}
-      </UiButton>
-    </form>
-
-    <form class="mt-4 grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm" @submit.prevent="verifyByFile">
-      <UiFormField>
-        <UiLabel for="file-input">
-          Fichier (image, PDF, texte, etc.)
-        </UiLabel>
-        <input
-          id="file-input"
-          type="file"
-          class="w-full text-sm"
-          required
-          @change="(event) => uploadedFile = (event.target as HTMLInputElement).files?.[0] ?? null"
-        >
-      </UiFormField>
-      <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
-        {{ loadingFile ? 'Verification...' : 'Verifier par fichier' }}
-      </UiButton>
-    </form>
+    <UiCard as="form" class="mt-4" @submit.prevent="verifyByFile">
+      <UiCardContent>
+        <div class="grid gap-4">
+          <UiFormField>
+            <UiLabel for="file-input">
+              Fichier (image, PDF, texte, etc.)
+            </UiLabel>
+            <UiFileInput
+              id="file-input"
+              required
+              @change="(file) => uploadedFile = file"
+            />
+          </UiFormField>
+          <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
+            {{ loadingFile ? 'Verification...' : 'Verifier par fichier' }}
+          </UiButton>
+        </div>
+      </UiCardContent>
+    </UiCard>
 
     <p v-if="result" class="mt-5 text-sm font-medium" :class="result.status === 'AUTHENTIQUE' ? 'text-emerald-700' : 'text-red-700'">
       {{ result.status }} - {{ result.details }}

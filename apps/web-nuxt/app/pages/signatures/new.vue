@@ -77,69 +77,78 @@ async function copyVerificationLink() {
     <h1 class="text-2xl font-semibold">
       Creer une signature
     </h1>
-    <form class="mt-6 grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm" @submit.prevent="submitSignature">
-      <UiFormField>
-        <UiLabel for="source-type">
-          Type de source
-        </UiLabel>
-        <select id="source-type" v-model="sourceType" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
-          <option value="plain_text">
-            Texte simple
-          </option>
-          <option value="text">
-            Fichier texte
-          </option>
-          <option value="markdown">
-            Texte markdown
-          </option>
-          <option value="image">
-            Image
-          </option>
-          <option value="pdf">
-            PDF
-          </option>
-        </select>
-      </UiFormField>
+    <UiCard as="form" class="mt-6" @submit.prevent="submitSignature">
+      <UiCardContent>
+        <div class="grid gap-4">
+          <UiFormField>
+            <UiLabel for="source-type">
+              Type de source
+            </UiLabel>
+            <UiSelect id="source-type" v-model="sourceType">
+              <option value="plain_text">
+                Texte simple
+              </option>
+              <option value="text">
+                Fichier texte
+              </option>
+              <option value="markdown">
+                Texte markdown
+              </option>
+              <option value="image">
+                Image
+              </option>
+              <option value="pdf">
+                PDF
+              </option>
+            </UiSelect>
+          </UiFormField>
 
-      <UiFormField v-if="sourceType === 'plain_text'">
-        <UiLabel for="plain-text">
-          Texte a signer
-        </UiLabel>
-        <textarea id="plain-text" v-model="plainText" class="min-h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" required />
-      </UiFormField>
+          <UiFormField v-if="sourceType === 'plain_text'">
+            <UiLabel for="plain-text">
+              Texte a signer
+            </UiLabel>
+            <UiTextarea id="plain-text" v-model="plainText" :rows="6" required />
+          </UiFormField>
 
-      <UiFormField v-if="sourceType === 'text'">
-        <UiLabel for="text-content">
-          Contenu texte
-        </UiLabel>
-        <textarea id="text-content" v-model="textContent" class="min-h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" required />
-      </UiFormField>
+          <UiFormField v-if="sourceType === 'text'">
+            <UiLabel for="text-content">
+              Contenu texte
+            </UiLabel>
+            <UiTextarea id="text-content" v-model="textContent" :rows="6" required />
+          </UiFormField>
 
-      <UiFormField v-if="sourceType === 'markdown'">
-        <UiLabel for="markdown-content">
-          Contenu markdown
-        </UiLabel>
-        <textarea id="markdown-content" v-model="markdownContent" class="min-h-28 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" required />
-      </UiFormField>
+          <UiFormField v-if="sourceType === 'markdown'">
+            <UiLabel for="markdown-content">
+              Contenu markdown
+            </UiLabel>
+            <UiTextarea id="markdown-content" v-model="markdownContent" :rows="6" required />
+          </UiFormField>
 
-      <UiFormField v-if="sourceType === 'image' || sourceType === 'pdf'">
-        <UiLabel for="upload-file">
-          Fichier a signer
-        </UiLabel>
-        <input id="upload-file" type="file" :accept="sourceType === 'image' ? 'image/*' : 'application/pdf'" class="w-full text-sm" required @change="(event) => uploadedFile = (event.target as HTMLInputElement).files?.[0] ?? null">
-      </UiFormField>
+          <UiFormField v-if="sourceType === 'image' || sourceType === 'pdf'">
+            <UiLabel for="upload-file">
+              Fichier a signer
+            </UiLabel>
+            <UiFileInput
+              id="upload-file"
+              :accept="sourceType === 'image' ? 'image/*' : 'application/pdf'"
+              required
+              @change="(file) => uploadedFile = file"
+            />
+          </UiFormField>
 
-      <UiFormField>
-        <UiLabel for="creator-id">
-          Creator ID (optionnel)
-        </UiLabel>
-        <UiInput id="creator-id" v-model="creatorId" type="text" name="creator-id" placeholder="ex: alice" />
-      </UiFormField>
+          <UiFormField>
+            <UiLabel for="creator-id">
+              Creator ID (optionnel)
+            </UiLabel>
+            <UiInput id="creator-id" v-model="creatorId" type="text" name="creator-id" placeholder="ex: alice" />
+          </UiFormField>
 
-      <UiButton type="submit" :disabled="loading">
-        {{ loading ? 'Creation...' : 'Enregistrer la signature' }}
-      </UiButton>
-    </form>
+          <UiButton type="submit" :disabled="loading">
+            {{ loading ? 'Creation...' : 'Enregistrer la signature' }}
+          </UiButton>
+        </div>
+      </UiCardContent>
+    </UiCard>
 
     <p
       v-if="result"

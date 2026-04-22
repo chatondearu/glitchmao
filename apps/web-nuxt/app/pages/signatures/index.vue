@@ -122,63 +122,67 @@ onMounted(async () => {
       </div>
     </div>
 
-    <form class="mt-5 grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-5" @submit.prevent="applyFilters">
-      <UiFormField>
-        <UiLabel for="source-filter">
-          Type
-        </UiLabel>
-        <select id="source-filter" v-model="sourceType" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
-          <option value="">
-            Tous
-          </option>
-          <option value="image">
-            Image
-          </option>
-          <option value="pdf">
-            PDF
-          </option>
-          <option value="text">
-            Texte
-          </option>
-          <option value="markdown">
-            Markdown
-          </option>
-          <option value="plain_text">
-            Texte simple
-          </option>
-        </select>
-      </UiFormField>
-      <UiFormField>
-        <UiLabel for="profile-filter">
-          Profil
-        </UiLabel>
-        <select id="profile-filter" v-model="profileId" class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
-          <option value="">
-            Tous
-          </option>
-          <option v-for="profile in profiles" :key="profile.profileId" :value="profile.profileId">
-            {{ profile.displayName }} (@{{ profile.handle }})
-          </option>
-        </select>
-      </UiFormField>
-      <UiFormField>
-        <UiLabel for="from-filter">
-          De
-        </UiLabel>
-        <UiInput id="from-filter" v-model="from" type="date" name="from-filter" />
-      </UiFormField>
-      <UiFormField>
-        <UiLabel for="to-filter">
-          A
-        </UiLabel>
-        <UiInput id="to-filter" v-model="to" type="date" name="to-filter" />
-      </UiFormField>
-      <div class="flex items-end">
-        <UiButton type="submit" class="w-full">
-          Filtrer
-        </UiButton>
-      </div>
-    </form>
+    <UiCard as="form" class="mt-5" @submit.prevent="applyFilters">
+      <UiCardContent>
+        <div class="grid gap-3 sm:grid-cols-5">
+          <UiFormField>
+            <UiLabel for="source-filter">
+              Type
+            </UiLabel>
+            <UiSelect id="source-filter" v-model="sourceType">
+              <option value="">
+                Tous
+              </option>
+              <option value="image">
+                Image
+              </option>
+              <option value="pdf">
+                PDF
+              </option>
+              <option value="text">
+                Texte
+              </option>
+              <option value="markdown">
+                Markdown
+              </option>
+              <option value="plain_text">
+                Texte simple
+              </option>
+            </UiSelect>
+          </UiFormField>
+          <UiFormField>
+            <UiLabel for="profile-filter">
+              Profil
+            </UiLabel>
+            <UiSelect id="profile-filter" v-model="profileId">
+              <option value="">
+                Tous
+              </option>
+              <option v-for="profile in profiles" :key="profile.profileId" :value="profile.profileId">
+                {{ profile.displayName }} (@{{ profile.handle }})
+              </option>
+            </UiSelect>
+          </UiFormField>
+          <UiFormField>
+            <UiLabel for="from-filter">
+              De
+            </UiLabel>
+            <UiInput id="from-filter" v-model="from" type="date" name="from-filter" />
+          </UiFormField>
+          <UiFormField>
+            <UiLabel for="to-filter">
+              A
+            </UiLabel>
+            <UiInput id="to-filter" v-model="to" type="date" name="to-filter" />
+          </UiFormField>
+          <div class="flex items-end">
+            <UiButton type="submit" class="w-full">
+              Filtrer
+            </UiButton>
+          </div>
+        </div>
+      </UiCardContent>
+    </UiCard>
 
     <p v-if="loading" class="mt-4 text-sm text-slate-600">
       Chargement...
@@ -190,7 +194,7 @@ onMounted(async () => {
       {{ copyError }}
     </p>
 
-    <div v-if="!loading" class="mt-4 overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm">
+    <UiCard v-if="!loading" class="mt-4 overflow-x-auto">
       <table class="min-w-full text-sm">
         <thead class="bg-slate-100 text-left text-slate-700">
           <tr>
@@ -232,14 +236,16 @@ onMounted(async () => {
             </td>
             <td class="px-3 py-2 font-mono text-xs whitespace-nowrap">
               <div class="flex items-center gap-2">
-                <button
+                <UiButton
                   type="button"
-                  class="cursor-copy rounded px-1 py-0.5 text-left hover:bg-slate-100"
+                  variant="ghost"
+                  size="sm"
+                  class="h-auto px-1 py-0.5 font-mono"
                   :title="`Copier ${item.id}`"
                   @click="copyPublicId(item.id)"
                 >
                   {{ item.id }}
-                </button>
+                </UiButton>
                 <UiButton type="button" variant="secondary" class="px-2 py-1 text-xs" @click="copyPublicId(item.id)">
                   {{ copiedPublicId === item.id ? 'Copie' : 'Copier' }}
                 </UiButton>
@@ -256,7 +262,7 @@ onMounted(async () => {
           </tr>
         </tbody>
       </table>
-    </div>
+    </UiCard>
     <div v-if="nextCursor" class="mt-4 flex justify-center">
       <UiButton type="button" variant="secondary" @click="fetchSignatures(true)">
         Charger plus

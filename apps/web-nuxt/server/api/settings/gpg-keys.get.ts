@@ -1,13 +1,14 @@
 import { and, desc, eq } from 'drizzle-orm'
 import { getCurrentProfile } from '../../utils/current-user'
 import { getDb } from '../../utils/db'
+import { requireKeyManagementPermission } from '../../utils/permissions'
 import { gpgKeys } from '../../db/schema'
 
-export default defineEventHandler(async () => {
-  const current = await getCurrentProfile()
-  if (!current) {
+export default defineEventHandler(async (event) => {
+  await requireKeyManagementPermission(event)
+  const current = await getCurrentProfile(event)
+  if (!current)
     throw createError({ statusCode: 404, statusMessage: 'No profile found' })
-  }
 
   const db = getDb()
   const items = await db

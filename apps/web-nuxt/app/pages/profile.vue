@@ -80,46 +80,50 @@ onMounted(loadProfile)
       {{ profile ? 'Editez votre profil principal.' : 'Creez votre profil principal pour commencer.' }}
     </p>
 
-    <form class="mt-6 grid gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm" @submit.prevent="saveProfile">
-      <UiFormField>
-        <UiLabel for="display-name">
-          Nom affiche
-        </UiLabel>
-        <UiInput id="display-name" v-model="displayName" type="text" name="display-name" required />
-      </UiFormField>
+    <UiCard as="form" class="mt-6" @submit.prevent="saveProfile">
+      <UiCardContent>
+        <div class="grid gap-4">
+          <UiFormField>
+            <UiLabel for="display-name">
+              Nom affiche
+            </UiLabel>
+            <UiInput id="display-name" v-model="displayName" type="text" name="display-name" required />
+          </UiFormField>
 
-      <UiFormField>
-        <UiLabel for="handle">
-          Handle
-        </UiLabel>
-        <UiInput id="handle" v-model="handle" type="text" name="handle" :disabled="Boolean(profile)" required />
-      </UiFormField>
+          <UiFormField>
+            <UiLabel for="handle">
+              Handle
+            </UiLabel>
+            <UiInput id="handle" v-model="handle" type="text" name="handle" :disabled="Boolean(profile)" required />
+          </UiFormField>
 
-      <UiFormField>
-        <UiLabel for="avatar-url">
-          Avatar URL (optionnel)
-        </UiLabel>
-        <UiInput id="avatar-url" v-model="avatarUrl" type="url" name="avatar-url" />
-      </UiFormField>
+          <UiFormField>
+            <UiLabel for="avatar-url">
+              Avatar URL (optionnel)
+            </UiLabel>
+            <UiInput id="avatar-url" v-model="avatarUrl" type="url" name="avatar-url" />
+          </UiFormField>
 
-      <UiFormField>
-        <UiLabel for="key-fingerprint">
-          Key fingerprint (optionnel)
-        </UiLabel>
-        <UiInput id="key-fingerprint" v-model="keyFingerprint" type="text" name="key-fingerprint" />
-      </UiFormField>
+          <UiFormField>
+            <UiLabel for="key-fingerprint">
+              Key fingerprint (optionnel)
+            </UiLabel>
+            <UiInput id="key-fingerprint" v-model="keyFingerprint" type="text" name="key-fingerprint" />
+          </UiFormField>
 
-      <UiFormField>
-        <UiLabel for="bio">
-          Bio (optionnel)
-        </UiLabel>
-        <textarea id="bio" v-model="bio" class="min-h-24 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
-      </UiFormField>
+          <UiFormField>
+            <UiLabel for="bio">
+              Bio (optionnel)
+            </UiLabel>
+            <UiTextarea id="bio" v-model="bio" :rows="5" />
+          </UiFormField>
 
-      <UiButton type="submit">
-        {{ profile ? 'Mettre a jour le profil' : 'Creer le profil' }}
-      </UiButton>
-    </form>
+          <UiButton type="submit">
+            {{ profile ? 'Mettre a jour le profil' : 'Creer le profil' }}
+          </UiButton>
+        </div>
+      </UiCardContent>
+    </UiCard>
 
     <p v-if="success" class="mt-4 text-sm font-medium text-emerald-700">
       {{ success }}

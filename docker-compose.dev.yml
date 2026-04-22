@@ -4,26 +4,56 @@ services:
       context: .
       dockerfile: infra/docker/Dockerfile.dev
     working_dir: /workspace
-    command: sh -lc "npm install --prefix apps/web-nuxt && npm run db:migrate:sql --prefix apps/web-nuxt && npm run dev --prefix apps/web-nuxt -- --host 0.0.0.0 --port 3000"
+    command: sh -lc "mkdir -p /workspace/apps/web-nuxt/node_modules /workspace/.npm-cache /workspace/apps/web-nuxt/.nuxt /workspace/apps/web-nuxt/.output && chown -R node:node /workspace/apps/web-nuxt/node_modules /workspace/.npm-cache /workspace/apps/web-nuxt/.nuxt /workspace/apps/web-nuxt/.output && su -m node -s /bin/sh -c 'cd /workspace && npm install --prefix apps/web-nuxt && npm run db:migrate:sql --prefix apps/web-nuxt && npm run dev --prefix apps/web-nuxt -- --host 0.0.0.0 --port 3000'"
     volumes:
       - .:/workspace
-      - web_npm_cache:/root/.npm
+      - web_node_modules:/workspace/apps/web-nuxt/node_modules
+      - web_npm_cache:/workspace/.npm-cache
       - web_cargo_cache:/usr/local/cargo/registry
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://glitchmao:glitchmao@postgres:5432/glitchmao
-      GPG_KEY_ID: test@glitchmao.local
-      SIGNER_SERVICE_URL: http://signer:4000
-      VERIFICATION_BASE_URL: http://localhost:3000/verify
-      STORAGE_PROVIDER: none
-      STORAGE_BUCKET: ""
-      STORAGE_BASE_URL: ""
+      DATABASE_URL: ${DATABASE_URL_DOCKER_DEV:-postgresql://glitchmao:glitchmao@postgres:5432/glitchmao}
+      GPG_KEY_ID: ${GPG_KEY_ID:-test@glitchmao.local}
+      SIGNER_SERVICE_URL: ${SIGNER_SERVICE_URL:-http://signer:4000}
+      VERIFICATION_BASE_URL: ${VERIFICATION_BASE_URL:-http://localhost:3000/verify}
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-none}
+      STORAGE_BUCKET: ${STORAGE_BUCKET:-}
+      STORAGE_BASE_URL: ${STORAGE_BASE_URL:-}
+      SMTP_HOST: ${SMTP_HOST:-smtp.fastmail.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-no-reply@glitchmao.local}
+      PASSWORD_RESET_BASE_URL: ${PASSWORD_RESET_BASE_URL:-http://localhost:3000/reset-password}
+      SIGNER_SECURITY_MODE: ${SIGNER_SECURITY_MODE:-secure}
+      SIGNER_JWT_SECRET: ${SIGNER_JWT_SECRET:-change-me-in-env}
+      SIGNER_JWT_TTL_SEC: ${SIGNER_JWT_TTL_SEC:-60}
+      CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-true}
+      NPM_CONFIG_CACHE: ${NPM_CONFIG_CACHE_DOCKER:-/workspace/.npm-cache}
     depends_on:
       postgres:
         condition: service_healthy
       signer:
         condition: service_started
+
+  web-migrations:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.dev
+    working_dir: /workspace
+    command: sh -lc "mkdir -p /workspace/apps/web-nuxt/node_modules /workspace/.npm-cache && chown -R node:node /workspace/apps/web-nuxt/node_modules /workspace/.npm-cache && su -m node -s /bin/sh -c 'cd /workspace && npm install --prefix apps/web-nuxt && npm run db:watch:sql --prefix apps/web-nuxt'"
+    volumes:
+      - .:/workspace
+      - web_node_modules:/workspace/apps/web-nuxt/node_modules
+      - web_npm_cache:/workspace/.npm-cache
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER_DEV:-postgresql://glitchmao:glitchmao@postgres:5432/glitchmao}
+      NPM_CONFIG_CACHE: ${NPM_CONFIG_CACHE_DOCKER:-/workspace/.npm-cache}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   signer:
     build:
@@ -36,18 +66,21 @@ services:
       - signer_cargo_cache:/usr/local/cargo/registry
       - signer_gpg_home:/gnupg
     environment:
-      GPG_KEY_ID: test@glitchmao.local
-      SIGNER_DEFAULT_KEY_ID: test@glitchmao.local
-      SIGNER_HOST: 0.0.0.0
-      SIGNER_PORT: 4000
-      GNUPGHOME: /gnupg
+      GPG_KEY_ID: ${GPG_KEY_ID:-test@glitchmao.local}
+      SIGNER_DEFAULT_KEY_ID: ${SIGNER_DEFAULT_KEY_ID:-test@glitchmao.local}
+      SIGNER_SECURITY_MODE: ${SIGNER_SECURITY_MODE:-secure}
+      SIGNER_INSECURE_BIND: ${SIGNER_INSECURE_BIND:-127.0.0.1}
+      SIGNER_JWT_SECRET: ${SIGNER_JWT_SECRET:-change-me-in-env}
+      SIGNER_HOST: ${SIGNER_HOST:-0.0.0.0}
+      SIGNER_PORT: ${SIGNER_PORT:-4000}
+      GNUPGHOME: ${GNUPGHOME_DOCKER:-/gnupg}
 
   postgres:
     image: postgres:16
     environment:
-      POSTGRES_USER: glitchmao
-      POSTGRES_PASSWORD: glitchmao
-      POSTGRES_DB: glitchmao
+      POSTGRES_USER: ${POSTGRES_USER:-glitchmao}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-glitchmao}
+      POSTGRES_DB: ${POSTGRES_DB:-glitchmao}
     ports:
       - "5432:5432"
     volumes:
@@ -60,6 +93,7 @@ services:
 
 volumes:
   pg_data_dev:
+  web_node_modules:
   web_npm_cache:
   web_cargo_cache:
   signer_cargo_cache:

@@ -18,6 +18,11 @@
 ## Workflow
 
 - Run commands from within `nix develop` to ensure consistent tool versions.
+- For checks (`test`, `lint`, `build`, migrations), prefer `nix develop -c <command>` explicitly.
+- For Docker dev (`docker-compose.dev.yml`), keep `apps/web-nuxt/node_modules` in a named volume and run npm commands as the `node` user inside containers to avoid permission drift on the host.
+- SQL migration flow in Docker dev:
+  - `web-migrations` service watches `infra/db/migrations/*.sql` and reapplies migrations automatically.
+  - Use `npm run dev:docker:rebuild` from repository root when you need a forced dev image rebuild.
 - Keep changes scoped: avoid mixing refactors with feature work in one commit.
 - Update `README.md` and `.env.example` when runtime behavior or env variables change.
 - For UI work in `apps/web-nuxt`, prefer extending components in `app/components/ui` before duplicating markup in pages.
