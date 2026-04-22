@@ -73,10 +73,10 @@ onMounted(loadProfile)
 </script>
 
 <template>
-  <main class="ui-container max-w-4xl py-8">
-    <h1 class="text-headline-md font-semibold">
+  <section class="mt-6">
+    <h2 class="text-body-lg font-semibold">
       {{ t('title') }}
-    </h1>
+    </h2>
     <p class="mt-2 text-body-md text-on-surface-variant">
       {{ profile ? t('subtitleEdit') : t('subtitleCreate') }}
     </p>
@@ -132,7 +132,7 @@ onMounted(loadProfile)
     <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
     </p>
-  </main>
+  </section>
 </template>
 
 <i18n lang="json">
