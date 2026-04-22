@@ -21,6 +21,7 @@ export default defineEventHandler(async (event) => {
 
   const items = await db.select({
     profileId: profiles.id,
+    locale: profiles.locale,
     bio: profiles.bio,
     avatarUrl: profiles.avatarUrl,
     keyFingerprint: profiles.keyFingerprint,
@@ -33,6 +34,9 @@ export default defineEventHandler(async (event) => {
     authenticated: true,
     user: session.user,
     activeProfileId: session.profile?.profileId ?? null,
+    activeProfileLocale: session.profile?.profileId
+      ? items.find(item => item.profileId === session.profile?.profileId)?.locale ?? null
+      : (items[0]?.locale ?? null),
     email: authState?.email ?? null,
     hasPassword: Boolean(authState?.hasPassword),
     permissions,

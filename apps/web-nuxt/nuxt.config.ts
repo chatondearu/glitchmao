@@ -5,7 +5,21 @@ export default defineNuxtConfig({
   modules: [
     '@unocss/nuxt',
     'reka-ui/nuxt',
+    '@nuxtjs/i18n',
   ],
+  i18n: {
+    defaultLocale: 'fr',
+    strategy: 'no_prefix',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'glitchmao-locale',
+      redirectOn: 'root',
+    },
+    locales: [
+      { code: 'fr', name: 'Francais' },
+      { code: 'en', name: 'English' },
+    ],
+  },
   typescript: {
     strict: true,
     typeCheck: false,

@@ -10,6 +10,7 @@ export async function getCurrentProfile(event: H3Event) {
   const [selectedProfile] = await db
     .select({
       profileId: profiles.id,
+      locale: profiles.locale,
       bio: profiles.bio,
       avatarUrl: profiles.avatarUrl,
       keyFingerprint: profiles.keyFingerprint,
@@ -26,6 +27,7 @@ export async function getCurrentProfile(event: H3Event) {
     return {
       userId: session.user.userId,
       profileId: selectedProfile.profileId,
+      locale: selectedProfile.locale,
       handle: session.user.handle,
       displayName: session.user.displayName,
       bio: selectedProfile.bio,
@@ -39,6 +41,7 @@ export async function getCurrentProfile(event: H3Event) {
   const [fallbackProfile] = await db
     .select({
       profileId: profiles.id,
+      locale: profiles.locale,
       bio: profiles.bio,
       avatarUrl: profiles.avatarUrl,
       keyFingerprint: profiles.keyFingerprint,
@@ -58,6 +61,7 @@ export async function getCurrentProfile(event: H3Event) {
   return {
     userId: session.user.userId,
     profileId: fallbackProfile.profileId,
+    locale: fallbackProfile.locale,
     handle: session.user.handle,
     displayName: session.user.displayName,
     bio: fallbackProfile.bio,

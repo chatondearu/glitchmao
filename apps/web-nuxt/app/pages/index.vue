@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n({ useScope: 'local' })
 const hash = ref('')
 const uploadedFile = ref<File | null>(null)
 const result = ref<{ status: string; details: string } | null>(null)
@@ -18,7 +19,9 @@ async function verifyByHash() {
     result.value = response
   }
   catch (err) {
-    error.value = err instanceof Error ? err.message : 'Verification failed'
+    error.value = err instanceof Error
+      ? err.message
+      : t('errors.verifyFailed')
   }
   finally {
     loadingHash.value = false
@@ -29,7 +32,7 @@ async function verifyByFile() {
   error.value = ''
   result.value = null
   if (!uploadedFile.value) {
-    error.value = 'Veuillez selectionner un fichier.'
+    error.value = t('errors.missingFile')
     return
   }
 
@@ -45,7 +48,9 @@ async function verifyByFile() {
     result.value = response
   }
   catch (err) {
-    error.value = err instanceof Error ? err.message : 'Verification failed'
+    error.value = err instanceof Error
+      ? err.message
+      : t('errors.verifyFailed')
   }
   finally {
     loadingFile.value = false
@@ -59,25 +64,25 @@ async function verifyByFile() {
       <UiCardContent>
         <UiCardHeader>
           <h1 class="text-headline-md font-semibold text-on-surface">
-            GlitchMao Verification
+            {{ t('title') }}
           </h1>
         </UiCardHeader>
         <div class="mt-4 grid gap-4">
           <UiFormField>
             <UiLabel for="hash-input">
-              SHA-256 Hash
+              {{ t('hashLabel') }}
             </UiLabel>
             <UiInput
               id="hash-input"
               v-model="hash"
               type="text"
               name="hash"
-              placeholder="Paste content hash"
+              :placeholder="t('hashPlaceholder')"
               required
             />
           </UiFormField>
           <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
-            {{ loadingHash ? 'Verification...' : 'Verifier par hash' }}
+            {{ loadingHash ? t('verifying') : t('verifyByHash') }}
           </UiButton>
         </div>
       </UiCardContent>
@@ -88,7 +93,7 @@ async function verifyByFile() {
         <div class="grid gap-4">
           <UiFormField>
             <UiLabel for="file-input">
-              Fichier (image, PDF, texte, etc.)
+              {{ t('fileLabel') }}
             </UiLabel>
             <UiFileInput
               id="file-input"
@@ -97,7 +102,7 @@ async function verifyByFile() {
             />
           </UiFormField>
           <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
-            {{ loadingFile ? 'Verification...' : 'Verifier par fichier' }}
+            {{ loadingFile ? t('verifying') : t('verifyByFile') }}
           </UiButton>
         </div>
       </UiCardContent>
@@ -111,3 +116,34 @@ async function verifyByFile() {
     </p>
   </main>
 </template>
+
+<i18n lang="json">
+{
+  "fr": {
+    "title": "Verification GlitchMao",
+    "hashLabel": "Hash SHA-256",
+    "hashPlaceholder": "Collez le hash du contenu",
+    "verifying": "Verification...",
+    "verifyByHash": "Verifier par hash",
+    "verifyByFile": "Verifier par fichier",
+    "fileLabel": "Fichier (image, PDF, texte, etc.)",
+    "errors": {
+      "verifyFailed": "Echec de verification.",
+      "missingFile": "Veuillez selectionner un fichier."
+    }
+  },
+  "en": {
+    "title": "GlitchMao Verification",
+    "hashLabel": "SHA-256 Hash",
+    "hashPlaceholder": "Paste content hash",
+    "verifying": "Verifying...",
+    "verifyByHash": "Verify by hash",
+    "verifyByFile": "Verify by file",
+    "fileLabel": "File (image, PDF, text, etc.)",
+    "errors": {
+      "verifyFailed": "Verification failed.",
+      "missingFile": "Please select a file."
+    }
+  }
+}
+</i18n>

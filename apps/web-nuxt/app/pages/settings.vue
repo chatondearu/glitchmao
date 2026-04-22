@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n({ useScope: 'local' })
 interface GpgKeyItem {
   id: string
   fingerprint: string
@@ -29,7 +30,7 @@ async function loadAuthState() {
     email.value = response.email ?? ''
   }
   catch (err) {
-    authError.value = err instanceof Error ? err.message : 'Failed to load auth state'
+    authError.value = err instanceof Error ? err.message : t('errors.loadAuthState')
   }
 }
 
@@ -37,11 +38,11 @@ async function configurePassword() {
   authError.value = ''
   authSuccess.value = ''
   if (newPassword.value !== confirmPassword.value) {
-    authError.value = 'Les mots de passe ne correspondent pas.'
+    authError.value = t('errors.passwordMismatch')
     return
   }
   if (newPassword.value.length < PASSWORD_MIN_LENGTH || newPassword.value.length > PASSWORD_MAX_LENGTH) {
-    authError.value = `Le mot de passe doit contenir entre ${PASSWORD_MIN_LENGTH} et ${PASSWORD_MAX_LENGTH} caracteres.`
+    authError.value = t('passwordRule', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH })
     return
   }
   try {
@@ -52,13 +53,13 @@ async function configurePassword() {
         password: newPassword.value,
       },
     })
-    authSuccess.value = 'Mot de passe configure.'
+    authSuccess.value = t('messages.passwordConfigured')
     hasPassword.value = true
     newPassword.value = ''
     confirmPassword.value = ''
   }
   catch (err) {
-    authError.value = err instanceof Error ? err.message : 'Password setup failed'
+    authError.value = err instanceof Error ? err.message : t('errors.passwordSetupFailed')
   }
 }
 
@@ -69,7 +70,7 @@ async function loadKeys() {
     keys.value = response.items
   }
   catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load keys'
+    error.value = err instanceof Error ? err.message : t('errors.loadKeysFailed')
   }
 }
 
@@ -98,31 +99,31 @@ onMounted(async () => {
 <template>
   <main class="ui-container py-8">
     <h1 class="text-headline-md font-semibold">
-      Settings - Cles GPG
+      {{ t('title') }}
     </h1>
     <p class="mt-2 text-body-md text-on-surface-variant">
-      Vous pouvez definir la cle active par defaut et signaler une cle compromise.
+      {{ t('subtitle') }}
     </p>
 
     <UiCard v-if="!hasPassword" class="mt-5 border-primary-container bg-surface-container-high">
       <UiCardContent>
         <UiCardHeader>
           <h2 class="text-body-lg font-semibold text-on-surface">
-            Compte legacy - definir un mot de passe
+            {{ t('legacyTitle') }}
           </h2>
           <p class="text-body-md text-on-surface-variant">
-            Ce compte n'a pas encore de mot de passe. Configurez-le pour activer la connexion classique.
+            {{ t('legacySubtitle') }}
           </p>
         </UiCardHeader>
         <div class="mt-3 grid gap-3">
           <UiInput v-model="email" type="email" name="legacy-email" placeholder="email" />
-          <UiInput v-model="newPassword" type="password" name="legacy-password" placeholder="nouveau mot de passe" />
-          <UiInput v-model="confirmPassword" type="password" name="legacy-password-confirm" placeholder="confirmer le mot de passe" />
+          <UiInput v-model="newPassword" type="password" name="legacy-password" :placeholder="t('newPasswordPlaceholder')" />
+          <UiInput v-model="confirmPassword" type="password" name="legacy-password-confirm" :placeholder="t('confirmPasswordPlaceholder')" />
           <p class="ui-meta-mono">
-            Regle mot de passe: {{ PASSWORD_MIN_LENGTH }} a {{ PASSWORD_MAX_LENGTH }} caracteres.
+            {{ t('passwordRuleLabel', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH }) }}
           </p>
           <UiButton type="button" @click="configurePassword">
-            Configurer le mot de passe
+            {{ t('setPasswordAction') }}
           </UiButton>
         </div>
         <p v-if="authSuccess" class="ui-meta-mono mt-2 text-primary">
@@ -160,6 +161,7 @@ onMounted(async () => {
               </span>
               <span v-if="key.isDefault" class="bg-surface-bright px-2 py-1 text-label-caps text-on-surface">
                 default
+                
               </span>
             </div>
           </div>
@@ -169,7 +171,7 @@ onMounted(async () => {
               v-model="compromiseNote[key.id]"
               type="text"
               :name="`note-${key.id}`"
-              placeholder="Note de compromission (optionnel)"
+              :placeholder="t('compromiseNotePlaceholder')"
             />
             <UiButton
               type="button"
@@ -177,7 +179,7 @@ onMounted(async () => {
               :disabled="key.status !== 'active' || key.isDefault"
               @click="makeDefault(key.id)"
             >
-              Definir par defaut
+              {{ t('setDefaultAction') }}
             </UiButton>
             <UiButton
               type="button"
@@ -185,7 +187,7 @@ onMounted(async () => {
               :disabled="key.status === 'compromised'"
               @click="markCompromised(key.id)"
             >
-              Signaler compromise
+              {{ t('reportCompromisedAction') }}
             </UiButton>
           </div>
         </UiCardContent>
@@ -193,3 +195,54 @@ onMounted(async () => {
     </div>
   </main>
 </template>
+
+<i18n lang="json">
+{
+  "fr": {
+    "title": "Parametres - Cles GPG",
+    "subtitle": "Vous pouvez definir la cle active par defaut et signaler une cle compromise.",
+    "legacyTitle": "Compte legacy - definir un mot de passe",
+    "legacySubtitle": "Ce compte n a pas encore de mot de passe. Configurez-le pour activer la connexion classique.",
+    "newPasswordPlaceholder": "nouveau mot de passe",
+    "confirmPasswordPlaceholder": "confirmer le mot de passe",
+    "passwordRule": "Le mot de passe doit contenir entre {min} et {max} caracteres.",
+    "passwordRuleLabel": "Regle mot de passe: {min} a {max} caracteres.",
+    "setPasswordAction": "Configurer le mot de passe",
+    "compromiseNotePlaceholder": "Note de compromission (optionnel)",
+    "setDefaultAction": "Definir par defaut",
+    "reportCompromisedAction": "Signaler compromise",
+    "messages": {
+      "passwordConfigured": "Mot de passe configure."
+    },
+    "errors": {
+      "loadAuthState": "Impossible de charger l etat auth.",
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "passwordSetupFailed": "Echec de configuration du mot de passe.",
+      "loadKeysFailed": "Impossible de charger les cles."
+    }
+  },
+  "en": {
+    "title": "Settings - GPG keys",
+    "subtitle": "Set the active default key and report compromised keys.",
+    "legacyTitle": "Legacy account - set a password",
+    "legacySubtitle": "This account has no password yet. Configure one to enable standard login.",
+    "newPasswordPlaceholder": "new password",
+    "confirmPasswordPlaceholder": "confirm password",
+    "passwordRule": "Password must contain between {min} and {max} characters.",
+    "passwordRuleLabel": "Password rule: {min} to {max} characters.",
+    "setPasswordAction": "Set password",
+    "compromiseNotePlaceholder": "Compromise note (optional)",
+    "setDefaultAction": "Set as default",
+    "reportCompromisedAction": "Report compromised",
+    "messages": {
+      "passwordConfigured": "Password configured."
+    },
+    "errors": {
+      "loadAuthState": "Failed to load auth state",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordSetupFailed": "Password setup failed",
+      "loadKeysFailed": "Failed to load keys"
+    }
+  }
+}
+</i18n>

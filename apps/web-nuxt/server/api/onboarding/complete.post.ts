@@ -11,6 +11,7 @@ import { requireAuthSession, setSessionProfile } from '../../utils/auth-session'
 const bodySchema = z.object({
   handle: z.string().trim().min(3).max(80),
   display_name: z.string().trim().min(1).max(120),
+  locale: z.enum(['fr', 'en']).optional(),
   bio: z.string().trim().max(2000).optional(),
   avatar_url: z.string().trim().url().optional(),
 })
@@ -53,6 +54,7 @@ export default defineEventHandler(async (event) => {
     }).returning({ id: gpgKeys.id, fingerprint: gpgKeys.fingerprint })
 
     await db.update(profiles).set({
+      locale: parsed.data.locale ?? current.locale ?? 'fr',
       keyFingerprint: createdKey.fingerprint,
       onboardingCompletedAt: new Date(),
       onboardingVersion: 'v1',
@@ -84,6 +86,7 @@ export default defineEventHandler(async (event) => {
 
     const [createdProfile] = await tx.insert(profiles).values({
       userId: session.user.userId,
+      locale: parsed.data.locale ?? 'fr',
       bio: parsed.data.bio ?? null,
       avatarUrl: parsed.data.avatar_url ?? null,
       keyFingerprint: key.fingerprint,

@@ -1,20 +1,23 @@
 <script setup lang="ts">
 const route = useRoute()
+const { t, locale, setLocale } = useI18n()
 const onboardingRequired = useState<boolean>('onboarding-required', () => false)
 const { theme, toggleTheme, hydrateTheme } = useTheme()
-const profileOptions = ref<Array<{ profileId: string, handle: string, displayName: string }>>([])
+const profileOptions = ref<Array<{ profileId: string, handle: string, displayName: string, locale: 'fr' | 'en' }>>([])
 const authState = ref<{
   authenticated: boolean
   user?: { displayName: string }
   activeProfileId?: string | null
+  activeProfileLocale?: 'fr' | 'en' | null
 }>({ authenticated: false })
-const navItems = [
-  { to: '/', label: 'Verifier' },
-  { to: '/signatures/new', label: 'Creer' },
-  { to: '/signatures', label: 'Signatures' },
-  { to: '/profile', label: 'Profil' },
-  { to: '/settings', label: 'Settings' },
-]
+const language = ref<'fr' | 'en'>('fr')
+const navItems = computed(() => [
+  { to: '/', label: t('nav.verify') },
+  { to: '/signatures/new', label: t('nav.create') },
+  { to: '/signatures', label: t('nav.signatures') },
+  { to: '/profile', label: t('nav.profile') },
+  { to: '/settings', label: t('nav.settings') },
+])
 
 async function refreshAuth() {
   authState.value = await $fetch('/api/auth/me').catch(() => ({ authenticated: false }))
@@ -23,8 +26,12 @@ async function refreshAuth() {
     return
   }
 
-  const response = await $fetch<{ items: Array<{ profileId: string, handle: string, displayName: string }> }>('/api/profiles')
+  const response = await $fetch<{ items: Array<{ profileId: string, handle: string, displayName: string, locale: 'fr' | 'en' }> }>('/api/profiles')
   profileOptions.value = response.items
+  const nextLocale = (authState.value.activeProfileLocale
+    ?? response.items.find(item => item.profileId === authState.value.activeProfileId)?.locale
+    ?? language.value) as 'fr' | 'en'
+  await applyLocale(nextLocale, false)
 }
 
 async function switchProfile(profileId: string) {
@@ -48,6 +55,18 @@ async function logout() {
   await navigateTo('/login')
 }
 
+async function applyLocale(nextLocale: 'fr' | 'en', syncProfile = true) {
+  language.value = nextLocale
+  await setLocale(nextLocale)
+  if (!authState.value.authenticated || !syncProfile)
+    return
+
+  await $fetch('/api/profile/locale', {
+    method: 'PUT',
+    body: { locale: nextLocale },
+  }).catch(() => {})
+}
+
 onMounted(async () => {
   hydrateTheme()
   try {
@@ -69,8 +88,16 @@ onMounted(async () => {
           GlitchMao
         </NuxtLink>
         <div class="flex items-center gap-2">
+          <UiSelect
+            :model-value="language"
+            class="w-auto min-w-28"
+            @update:model-value="(value) => applyLocale(value as 'fr' | 'en')"
+          >
+            <option value="fr">FR</option>
+            <option value="en">EN</option>
+          </UiSelect>
           <UiButton type="button" variant="ghost" size="sm" @click="toggleTheme">
-            {{ theme === 'dark' ? 'Mode clair' : 'Mode sombre' }}
+            {{ theme === 'dark' ? t('nav.themeLight') : t('nav.themeDark') }}
           </UiButton>
           <template v-if="authState.authenticated">
             <span class="ui-meta-mono">{{ authState.user?.displayName }}</span>
@@ -85,7 +112,7 @@ onMounted(async () => {
               </option>
             </UiSelect>
             <UiButton type="button" variant="secondary" size="sm" @click="logout">
-              Logout
+              {{ t('nav.logout') }}
             </UiButton>
           </template>
         </div>

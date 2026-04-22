@@ -6,6 +6,7 @@ import { profiles, users } from '../db/schema'
 
 const bodySchema = z.object({
   display_name: z.string().trim().min(1).max(120),
+  locale: z.enum(['fr', 'en']).optional(),
   bio: z.string().trim().max(2000).optional(),
   avatar_url: z.string().trim().url().optional(),
   key_fingerprint: z.string().trim().max(120).optional(),
@@ -34,6 +35,7 @@ export default defineEventHandler(async (event) => {
     }).where(eq(users.id, current.userId))
 
     await tx.update(profiles).set({
+      locale: parsed.data.locale,
       bio: parsed.data.bio ?? null,
       avatarUrl: parsed.data.avatar_url ?? null,
       keyFingerprint: parsed.data.key_fingerprint ?? null,

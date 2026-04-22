@@ -19,3 +19,17 @@ GlitchMao separates responsibilities between services:
 - `postgres`: persistence for signatures, profiles, and key metadata.
 
 This split keeps cryptographic material in the signer service while preserving application-level auditability in PostgreSQL.
+
+## Localization and UI content
+
+The Nuxt web app uses `@nuxtjs/i18n` with two locales:
+
+- `fr` (French)
+- `en` (English)
+
+When adding or updating UI content:
+
+- Update both locales in the same change.
+- Use translation keys in code (`t('...')`), not hardcoded display strings.
+- Keep page-specific text in local `<i18n lang="json">` blocks.
+- Keep shared labels (navigation/common/global) in `apps/web-nuxt/i18n.config.ts`.

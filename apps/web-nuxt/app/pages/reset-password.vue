@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n({ useScope: 'local' })
 const route = useRoute()
 const token = computed(() => String(route.query.token ?? ''))
 const password = ref('')
@@ -13,15 +14,15 @@ async function resetPassword() {
   error.value = ''
   success.value = ''
   if (!token.value) {
-    error.value = 'Token manquant.'
+    error.value = t('errors.generic')
     return
   }
   if (password.value !== confirmPassword.value) {
-    error.value = 'Les mots de passe ne correspondent pas.'
+    error.value = t('auth.passwordMismatch')
     return
   }
   if (password.value.length < PASSWORD_MIN_LENGTH || password.value.length > PASSWORD_MAX_LENGTH) {
-    error.value = `Le mot de passe doit contenir entre ${PASSWORD_MIN_LENGTH} et ${PASSWORD_MAX_LENGTH} caracteres.`
+    error.value = t('auth.passwordHint', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH })
     return
   }
 
@@ -34,10 +35,10 @@ async function resetPassword() {
         password: password.value,
       },
     })
-    success.value = 'Mot de passe reinitialise. Tu peux maintenant te connecter.'
+    success.value = t('auth.resetSuccess')
   }
   catch (err) {
-    error.value = err instanceof Error ? err.message : 'Password reset failed'
+    error.value = err instanceof Error ? err.message : t('errors.resetFailed')
   }
   finally {
     loading.value = false
@@ -51,27 +52,27 @@ async function resetPassword() {
       <UiCardContent>
         <UiCardHeader>
           <h1 class="text-headline-md font-semibold">
-            Reinitialisation du mot de passe
+            {{ t('auth.resetTitle') }}
           </h1>
         </UiCardHeader>
         <div class="mt-4 grid gap-4">
           <UiFormField>
             <UiLabel for="new-password">
-              Nouveau mot de passe
+              {{ t('auth.newPassword') }}
             </UiLabel>
             <UiInput id="new-password" v-model="password" type="password" name="new-password" required />
             <p class="ui-meta-mono mt-1">
-              {{ PASSWORD_MIN_LENGTH }} a {{ PASSWORD_MAX_LENGTH }} caracteres.
+              {{ t('auth.passwordHint', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH }) }}
             </p>
           </UiFormField>
           <UiFormField>
             <UiLabel for="confirm-password">
-              Confirmer le mot de passe
+              {{ t('auth.confirmPassword') }}
             </UiLabel>
             <UiInput id="confirm-password" v-model="confirmPassword" type="password" name="confirm-password" required />
           </UiFormField>
           <UiButton :disabled="loading" type="submit">
-            {{ loading ? 'Chargement...' : 'Reinitialiser' }}
+            {{ loading ? t('common.loading') : t('auth.resetAction') }}
           </UiButton>
         </div>
       </UiCardContent>
@@ -84,3 +85,44 @@ async function resetPassword() {
     </p>
   </main>
 </template>
+
+<i18n lang="json">
+{
+  "fr": {
+    "common": {
+      "loading": "Chargement..."
+    },
+    "auth": {
+      "passwordMismatch": "Les mots de passe ne correspondent pas.",
+      "passwordHint": "Le mot de passe doit contenir entre {min} et {max} caracteres.",
+      "resetSuccess": "Mot de passe reinitialise. Vous pouvez maintenant vous connecter.",
+      "resetTitle": "Reinitialisation du mot de passe",
+      "newPassword": "Nouveau mot de passe",
+      "confirmPassword": "Confirmer le mot de passe",
+      "resetAction": "Reinitialiser"
+    },
+    "errors": {
+      "generic": "Une erreur est survenue.",
+      "resetFailed": "Echec de la reinitialisation du mot de passe."
+    }
+  },
+  "en": {
+    "common": {
+      "loading": "Loading..."
+    },
+    "auth": {
+      "passwordMismatch": "Passwords do not match.",
+      "passwordHint": "Password must contain between {min} and {max} characters.",
+      "resetSuccess": "Password has been reset. You can now sign in.",
+      "resetTitle": "Password reset",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "resetAction": "Reset"
+    },
+    "errors": {
+      "generic": "Something went wrong.",
+      "resetFailed": "Password reset failed."
+    }
+  }
+}
+</i18n>
