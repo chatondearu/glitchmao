@@ -16,9 +16,14 @@ const navItems = [
   { to: '/', labelKey: 'nav.verify' },
   { to: '/signatures/new', labelKey: 'nav.create' },
   { to: '/signatures', labelKey: 'nav.signatures' },
-  { to: '/profile', labelKey: 'nav.profile' },
-  { to: '/settings', labelKey: 'nav.settings' },
-]
+  { to: '/settings/profile', labelKey: 'nav.settings', activePrefix: '/settings' },
+] as const
+
+function isNavItemActive(item: (typeof navItems)[number]) {
+  if ('activePrefix' in item)
+    return route.path === item.to || route.path.startsWith(`${item.activePrefix}/`)
+  return route.path === item.to
+}
 
 async function refreshAuth() {
   authState.value = await $fetch('/api/auth/me').catch(() => ({ authenticated: false }))
@@ -86,7 +91,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="ui-page">
+  <div class="ui-page min-h-screen flex flex-col">
     <header class="border-b-2 border-outline-variant bg-surface-container-low">
       <div class="ui-container flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
         <NuxtLink to="/" class="text-headline-md font-semibold text-on-surface">
@@ -127,7 +132,7 @@ onMounted(async () => {
             :key="item.to"
             :to="item.to"
             class="inline-flex items-center gap-2 border border-outline-variant px-3 py-2 text-label-caps transition"
-            :class="route.path === item.to ? 'border-primary-container bg-primary-container text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'"
+            :class="isNavItemActive(item) ? 'border-primary-container bg-primary-container text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'"
           >
             <span v-if="index > 0" class="ui-meta-mono text-[10px] opacity-70">&gt;</span>
             {{ t(item.labelKey) }}
@@ -135,13 +140,35 @@ onMounted(async () => {
         </nav>
       </div>
     </header>
-    <slot />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <footer class="border-t-2 border-outline-variant bg-surface-container-low">
+      <div class="ui-container flex flex-wrap items-center justify-between gap-3 py-4">
+        <span class="ui-meta-mono text-xs text-on-surface-variant">
+          {{ t('footer.usefulLinks') }}
+        </span>
+        <div class="flex flex-wrap items-center gap-4 text-sm">
+          <UiLink to="https://github.com/chatondearu/glitchmao" external>
+            {{ t('footer.github') }}
+          </UiLink>
+          <UiLink to="https://github.com/chatondearu/glitchmao/tree/main/doc" external>
+            {{ t('footer.documentation') }}
+          </UiLink>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
 <i18n lang="json">
 {
   "fr": {
+    "footer": {
+      "usefulLinks": "Liens utiles",
+      "github": "Depot GitHub",
+      "documentation": "Documentation"
+    },
     "nav": {
       "verify": "Verifier",
       "create": "Creer",
@@ -154,6 +181,11 @@ onMounted(async () => {
     }
   },
   "en": {
+    "footer": {
+      "usefulLinks": "Useful links",
+      "github": "GitHub repository",
+      "documentation": "Documentation"
+    },
     "nav": {
       "verify": "Verify",
       "create": "Create",
