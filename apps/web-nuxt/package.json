@@ -13,6 +13,7 @@
     "db:watch:sql": "node ./scripts/watch-sql-migrations.mjs"
   },
   "dependencies": {
+    "@floating-ui/vue": "^1.1.11",
     "@nuxt/vite-builder": "^4.4.2",
     "@nuxtjs/i18n": "^10.2.4",
     "drizzle-orm": "^0.45.2",

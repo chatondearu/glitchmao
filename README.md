@@ -1,9 +1,9 @@
 # GlitchMao
 
-[![Version](https://img.shields.io/github/v/release/chatondearu/glitchmao?include_prereleases&label=version)](https://github.com/chatondearu/glitchmao/releases)
-[![Release Date](https://img.shields.io/github/release-date/chatondearu/glitchmao?label=released)](https://github.com/chatondearu/glitchmao/releases)
-[![CI](https://github.com/chatondearu/glitchmao/actions/workflows/release.yml/badge.svg)](https://github.com/chatondearu/glitchmao/actions/workflows/release.yml)
-[![License](https://img.shields.io/github/license/chatondearu/glitchmao)](./LICENSE)
+[Version](https://github.com/chatondearu/glitchmao/releases)
+[Release Date](https://github.com/chatondearu/glitchmao/releases)
+[CI](https://github.com/chatondearu/glitchmao/actions/workflows/release.yml)
+[License](./LICENSE)
 
 GlitchMao is an open-source authenticity toolkit built to make trust portable across the web and beyond.
 It links creator identity to digital or physical content through SHA-256 fingerprints and cryptographic signatures, with a verification flow designed for real-world usage.
@@ -11,6 +11,7 @@ It links creator identity to digital or physical content through SHA-256 fingerp
 **Proof for content. Confidence for people.**
 
 The core ideas behind the project are:
+
 - creation should stay simple for creators,
 - verification should remain independent for third parties,
 - trust should be auditable over time.
