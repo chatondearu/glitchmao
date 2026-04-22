@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n({ useScope: 'local' })
 const mode = ref<'login' | 'register'>('login')
 const handle = ref('')
 const email = ref('')
@@ -15,7 +16,7 @@ async function submit() {
   loading.value = true
   error.value = ''
   if (password.value.length < PASSWORD_MIN_LENGTH || password.value.length > PASSWORD_MAX_LENGTH) {
-    error.value = `Le mot de passe doit contenir entre ${PASSWORD_MIN_LENGTH} et ${PASSWORD_MAX_LENGTH} caracteres.`
+    error.value = t('auth.passwordHint', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH })
     loading.value = false
     return
   }
@@ -44,7 +45,7 @@ async function submit() {
     await navigateTo('/signatures/new')
   }
   catch (err) {
-    error.value = err instanceof Error ? err.message : 'Authentication failed'
+    error.value = err instanceof Error ? err.message : t('errors.authFailed')
   }
   finally {
     loading.value = false
@@ -59,10 +60,10 @@ async function requestPasswordReset() {
       method: 'POST',
       body: { identifier: forgotIdentifier.value },
     })
-    forgotSuccess.value = 'Si le compte existe, un e-mail de reinitialisation a ete envoye.'
+    forgotSuccess.value = t('auth.forgotSuccess')
   }
   catch (err) {
-    error.value = err instanceof Error ? err.message : 'Password reset request failed'
+    error.value = err instanceof Error ? err.message : t('errors.resetRequestFailed')
   }
 }
 </script>
@@ -73,47 +74,47 @@ async function requestPasswordReset() {
       <UiCardContent>
         <UiCardHeader>
           <h1 class="text-headline-md font-semibold">
-            {{ mode === 'login' ? 'Connexion' : 'Creer un compte' }}
+            {{ mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle') }}
           </h1>
           <p class="text-body-md text-on-surface-variant">
-            Authentifiez-vous pour acceder aux signatures et aux profils.
+            {{ t('auth.subtitle') }}
           </p>
         </UiCardHeader>
 
         <div class="mt-4 grid gap-4">
           <UiFormField>
             <UiLabel for="handle">
-              Handle
+              {{ t('auth.handle') }}
             </UiLabel>
             <UiInput id="handle" v-model="handle" type="text" name="handle" required />
           </UiFormField>
 
           <UiFormField v-if="mode === 'register'">
             <UiLabel for="email">
-              Email
+              {{ t('auth.email') }}
             </UiLabel>
             <UiInput id="email" v-model="email" type="email" name="email" required />
           </UiFormField>
 
           <UiFormField v-if="mode === 'register'">
             <UiLabel for="display-name">
-              Nom affiche
+              {{ t('auth.displayName') }}
             </UiLabel>
             <UiInput id="display-name" v-model="displayName" type="text" name="display-name" required />
           </UiFormField>
 
           <UiFormField>
             <UiLabel for="password">
-              Mot de passe
+              {{ t('auth.password') }}
             </UiLabel>
             <UiInput id="password" v-model="password" type="password" name="password" required />
             <p class="ui-meta-mono mt-1">
-              {{ PASSWORD_MIN_LENGTH }} a {{ PASSWORD_MAX_LENGTH }} caracteres.
+              {{ t('auth.passwordHint', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH }) }}
             </p>
           </UiFormField>
 
           <UiButton :disabled="loading" type="submit">
-            {{ loading ? 'Chargement...' : (mode === 'login' ? 'Se connecter' : 'Creer le compte') }}
+            {{ loading ? t('common.loading') : (mode === 'login' ? t('auth.login') : t('auth.register')) }}
           </UiButton>
         </div>
       </UiCardContent>
@@ -126,7 +127,7 @@ async function requestPasswordReset() {
       class="mt-4 underline underline-offset-2"
       @click="mode = mode === 'login' ? 'register' : 'login'"
     >
-      {{ mode === 'login' ? 'Pas de compte ? Inscription' : 'Deja un compte ? Connexion' }}
+      {{ mode === 'login' ? t('auth.noAccount') : t('auth.haveAccount') }}
     </UiButton>
 
     <p v-if="error" class="ui-meta-mono mt-4 text-error">
@@ -137,16 +138,16 @@ async function requestPasswordReset() {
       <UiCardContent>
         <UiCardHeader>
           <p class="text-body-md font-semibold text-on-surface">
-            Mot de passe oublie
+            {{ t('auth.forgotTitle') }}
           </p>
           <p class="ui-meta-mono">
-            Saisis ton handle ou ton e-mail pour recevoir un lien de reinitialisation.
+            {{ t('auth.forgotHint') }}
           </p>
         </UiCardHeader>
         <div class="mt-3 flex gap-2">
-          <UiInput v-model="forgotIdentifier" type="text" name="forgot-identifier" placeholder="handle ou email" />
+          <UiInput v-model="forgotIdentifier" type="text" name="forgot-identifier" :placeholder="t('auth.forgotPlaceholder')" />
           <UiButton type="button" variant="secondary" @click="requestPasswordReset">
-            Envoyer
+            {{ t('common.send') }}
           </UiButton>
         </div>
         <p v-if="forgotSuccess" class="ui-meta-mono mt-2 text-primary">
@@ -156,3 +157,64 @@ async function requestPasswordReset() {
     </UiCard>
   </main>
 </template>
+
+<i18n lang="json">
+{
+  "fr": {
+    "common": {
+      "loading": "Chargement...",
+      "send": "Envoyer"
+    },
+    "auth": {
+      "loginTitle": "Connexion",
+      "registerTitle": "Creer un compte",
+      "subtitle": "Authentifiez-vous pour acceder aux signatures et aux profils.",
+      "handle": "Identifiant",
+      "email": "Email",
+      "displayName": "Nom affiche",
+      "password": "Mot de passe",
+      "passwordHint": "Le mot de passe doit contenir entre {min} et {max} caracteres.",
+      "login": "Se connecter",
+      "register": "Creer le compte",
+      "noAccount": "Pas de compte ? Inscription",
+      "haveAccount": "Deja un compte ? Connexion",
+      "forgotTitle": "Mot de passe oublie",
+      "forgotHint": "Saisissez votre identifiant ou e-mail pour recevoir un lien de reinitialisation.",
+      "forgotPlaceholder": "identifiant ou email",
+      "forgotSuccess": "Si le compte existe, un e-mail de reinitialisation a ete envoye."
+    },
+    "errors": {
+      "authFailed": "Echec de l authentification.",
+      "resetRequestFailed": "Echec de la demande de reinitialisation."
+    }
+  },
+  "en": {
+    "common": {
+      "loading": "Loading...",
+      "send": "Send"
+    },
+    "auth": {
+      "loginTitle": "Sign in",
+      "registerTitle": "Create account",
+      "subtitle": "Sign in to access signatures and profiles.",
+      "handle": "Handle",
+      "email": "Email",
+      "displayName": "Display name",
+      "password": "Password",
+      "passwordHint": "Password must contain between {min} and {max} characters.",
+      "login": "Sign in",
+      "register": "Create account",
+      "noAccount": "No account? Register",
+      "haveAccount": "Already have an account? Sign in",
+      "forgotTitle": "Forgot password",
+      "forgotHint": "Enter your handle or email to receive a reset link.",
+      "forgotPlaceholder": "handle or email",
+      "forgotSuccess": "If the account exists, a reset email has been sent."
+    },
+    "errors": {
+      "authFailed": "Authentication failed.",
+      "resetRequestFailed": "Password reset request failed."
+    }
+  }
+}
+</i18n>

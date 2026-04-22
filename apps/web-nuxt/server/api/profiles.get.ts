@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
     .select({
       profileId: profiles.id,
       userId: users.id,
+      locale: profiles.locale,
       handle: users.handle,
       displayName: users.displayName,
     })

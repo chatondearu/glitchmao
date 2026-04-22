@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n({ useScope: 'local' })
 interface SignatureItem {
   id: string
   contentHash: string
@@ -54,7 +55,7 @@ async function fetchSignatures(append = false) {
     nextCursor.value = response.nextCursor
   }
   catch (err) {
-    error.value = err instanceof Error ? err.message : 'Failed to load signatures'
+    error.value = err instanceof Error ? err.message : t('errors.loadFailed')
   }
   finally {
     loading.value = false
@@ -98,7 +99,7 @@ async function copyPublicId(publicId: string) {
       }, 1600)
     }
     catch {
-      copyError.value = 'Impossible de copier automatiquement. Copie manuelle requise.'
+      copyError.value = t('errors.copyFailed')
     }
   }
 }
@@ -114,10 +115,10 @@ onMounted(async () => {
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <h1 class="text-headline-md font-semibold">
-          Signatures
+          {{ t('title') }}
         </h1>
         <p class="mt-1 text-body-md text-on-surface-variant">
-          Liste des signatures creees, filtrable par type et periode.
+          {{ t('subtitle') }}
         </p>
       </div>
     </div>
@@ -128,10 +129,11 @@ onMounted(async () => {
           <UiFormField>
             <UiLabel for="source-filter">
               Type
+              
             </UiLabel>
             <UiSelect id="source-filter" v-model="sourceType">
               <option value="">
-                Tous
+                {{ t('all') }}
               </option>
               <option value="image">
                 Image
@@ -140,23 +142,23 @@ onMounted(async () => {
                 PDF
               </option>
               <option value="text">
-                Texte
+                {{ t('text') }}
               </option>
               <option value="markdown">
                 Markdown
               </option>
               <option value="plain_text">
-                Texte simple
+                {{ t('plainText') }}
               </option>
             </UiSelect>
           </UiFormField>
           <UiFormField>
             <UiLabel for="profile-filter">
-              Profil
+              {{ t('profile') }}
             </UiLabel>
             <UiSelect id="profile-filter" v-model="profileId">
               <option value="">
-                Tous
+                {{ t('all') }}
               </option>
               <option v-for="profile in profiles" :key="profile.profileId" :value="profile.profileId">
                 {{ profile.displayName }} (@{{ profile.handle }})
@@ -165,19 +167,19 @@ onMounted(async () => {
           </UiFormField>
           <UiFormField>
             <UiLabel for="from-filter">
-              De
+              {{ t('from') }}
             </UiLabel>
             <UiInput id="from-filter" v-model="from" type="date" name="from-filter" />
           </UiFormField>
           <UiFormField>
             <UiLabel for="to-filter">
-              A
+              {{ t('to') }}
             </UiLabel>
             <UiInput id="to-filter" v-model="to" type="date" name="to-filter" />
           </UiFormField>
           <div class="flex items-end">
             <UiButton type="submit" class="w-full">
-              Filtrer
+              {{ t('filter') }}
             </UiButton>
           </div>
         </div>
@@ -185,7 +187,7 @@ onMounted(async () => {
     </UiCard>
 
     <p v-if="loading" class="ui-meta-mono mt-4">
-      Chargement...
+      {{ t('loading') }}
     </p>
     <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
@@ -200,21 +202,22 @@ onMounted(async () => {
           <tr>
             <th class="px-3 py-2">
               Date
+              
             </th>
             <th class="px-3 py-2">
-              Type
+              {{ t('type') }}
             </th>
             <th class="px-3 py-2">
-              Profil
+              {{ t('profile') }}
             </th>
             <th class="px-3 py-2">
-              Statut
+              {{ t('status') }}
             </th>
             <th class="px-3 py-2">
-              ID public
+              {{ t('publicId') }}
             </th>
             <th class="px-3 py-2">
-              Hash
+              {{ t('hash') }}
             </th>
           </tr>
         </thead>
@@ -241,13 +244,13 @@ onMounted(async () => {
                   variant="ghost"
                   size="sm"
                   class="h-auto px-1 py-0.5 font-mono"
-                  :title="`Copier ${item.id}`"
+                  :title="t('copyItem', { id: item.id })"
                   @click="copyPublicId(item.id)"
                 >
                   {{ item.id }}
                 </UiButton>
                 <UiButton type="button" variant="secondary" size="sm" class="px-2 py-1 text-xs" @click="copyPublicId(item.id)">
-                  {{ copiedPublicId === item.id ? 'Copie' : 'Copier' }}
+                  {{ copiedPublicId === item.id ? t('copied') : t('copy') }}
                 </UiButton>
               </div>
             </td>
@@ -257,7 +260,7 @@ onMounted(async () => {
           </tr>
           <tr v-if="items.length === 0">
             <td colspan="6" class="px-3 py-6 text-center text-on-surface-variant">
-              Aucune signature.
+              {{ t('empty') }}
             </td>
           </tr>
         </tbody>
@@ -265,8 +268,63 @@ onMounted(async () => {
     </UiCard>
     <div v-if="nextCursor" class="mt-4 flex justify-center">
       <UiButton type="button" variant="secondary" @click="fetchSignatures(true)">
-        Charger plus
+        {{ t('loadMore') }}
       </UiButton>
     </div>
   </main>
 </template>
+
+<i18n lang="json">
+{
+  "fr": {
+    "title": "Signatures",
+    "subtitle": "Liste des signatures creees, filtrable par type et periode.",
+    "all": "Tous",
+    "text": "Texte",
+    "plainText": "Texte simple",
+    "profile": "Profil",
+    "from": "De",
+    "to": "A",
+    "filter": "Filtrer",
+    "loading": "Chargement...",
+    "type": "Type",
+    "status": "Statut",
+    "publicId": "ID public",
+    "hash": "Hash",
+    "copy": "Copier",
+    "copied": "Copie",
+    "copyItem": "Copier {id}",
+    "empty": "Aucune signature.",
+    "loadMore": "Charger plus",
+    "errors": {
+      "loadFailed": "Impossible de charger les signatures.",
+      "copyFailed": "Impossible de copier automatiquement. Copie manuelle requise."
+    }
+  },
+  "en": {
+    "title": "Signatures",
+    "subtitle": "List of created signatures, filterable by type and period.",
+    "all": "All",
+    "text": "Text",
+    "plainText": "Plain text",
+    "profile": "Profile",
+    "from": "From",
+    "to": "To",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "type": "Type",
+    "status": "Status",
+    "publicId": "Public ID",
+    "hash": "Hash",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyItem": "Copy {id}",
+    "empty": "No signatures.",
+    "loadMore": "Load more",
+    "errors": {
+      "loadFailed": "Failed to load signatures.",
+      "copyFailed": "Could not copy automatically. Please copy manually."
+    }
+  }
+}
+</i18n>

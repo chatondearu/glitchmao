@@ -6,6 +6,7 @@ import { requireAuthSession, setSessionProfile } from '../utils/auth-session'
 
 const bodySchema = z.object({
   display_name: z.string().trim().min(1).max(120).optional(),
+  locale: z.enum(['fr', 'en']).optional(),
   bio: z.string().trim().max(2000).optional(),
   avatar_url: z.string().trim().url().optional(),
   key_fingerprint: z.string().trim().max(120).optional(),
@@ -33,10 +34,11 @@ export default defineEventHandler(async (event) => {
 
     const [createdProfile] = await tx.insert(profiles).values({
       userId: session.user.userId,
+      locale: parsed.data.locale ?? 'fr',
       bio: parsed.data.bio ?? null,
       avatarUrl: parsed.data.avatar_url ?? null,
       keyFingerprint: parsed.data.key_fingerprint ?? null,
-    }).returning({ id: profiles.id, bio: profiles.bio, avatarUrl: profiles.avatarUrl, keyFingerprint: profiles.keyFingerprint })
+    }).returning({ id: profiles.id, locale: profiles.locale, bio: profiles.bio, avatarUrl: profiles.avatarUrl, keyFingerprint: profiles.keyFingerprint })
 
     const [currentUser] = await tx.select({
       id: users.id,
@@ -49,6 +51,7 @@ export default defineEventHandler(async (event) => {
       profileId: createdProfile.id,
       handle: currentUser.handle,
       displayName: currentUser.displayName,
+      locale: createdProfile.locale,
       bio: createdProfile.bio,
       avatarUrl: createdProfile.avatarUrl,
       keyFingerprint: createdProfile.keyFingerprint,

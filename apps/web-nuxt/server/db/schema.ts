@@ -19,6 +19,7 @@ export const users = pgTable('users', {
 export const profiles = pgTable('profiles', {
   id: uuid('id').defaultRandom().primaryKey(),
   userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  locale: varchar('locale', { length: 8 }).default('fr').notNull(),
   bio: text('bio'),
   avatarUrl: text('avatar_url'),
   keyFingerprint: varchar('key_fingerprint', { length: 120 }),

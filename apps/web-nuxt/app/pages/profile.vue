@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { t } = useI18n({ useScope: 'local' })
 interface ProfileResponse {
   profile: {
     userId: string
@@ -47,7 +48,7 @@ async function saveProfile() {
           key_fingerprint: keyFingerprint.value || undefined,
         },
       })
-      success.value = 'Profil cree.'
+      success.value = t('messages.created')
     }
     else {
       await $fetch('/api/profile', {
@@ -59,12 +60,12 @@ async function saveProfile() {
           key_fingerprint: keyFingerprint.value || undefined,
         },
       })
-      success.value = 'Profil mis a jour.'
+      success.value = t('messages.updated')
     }
     await loadProfile()
   }
   catch (err) {
-    error.value = err instanceof Error ? err.message : 'Profile request failed'
+    error.value = err instanceof Error ? err.message : t('messages.failed')
   }
 }
 
@@ -74,10 +75,10 @@ onMounted(loadProfile)
 <template>
   <main class="ui-container max-w-4xl py-8">
     <h1 class="text-headline-md font-semibold">
-      Profil
+      {{ t('title') }}
     </h1>
     <p class="mt-2 text-body-md text-on-surface-variant">
-      {{ profile ? 'Editez votre profil principal.' : 'Creez votre profil principal pour commencer.' }}
+      {{ profile ? t('subtitleEdit') : t('subtitleCreate') }}
     </p>
 
     <UiCard as="form" class="mt-6" @submit.prevent="saveProfile">
@@ -85,41 +86,41 @@ onMounted(loadProfile)
         <div class="grid gap-4">
           <UiFormField>
             <UiLabel for="display-name">
-              Nom affiche
+              {{ t('displayName') }}
             </UiLabel>
             <UiInput id="display-name" v-model="displayName" type="text" name="display-name" required />
           </UiFormField>
 
           <UiFormField>
             <UiLabel for="handle">
-              Handle
+              {{ t('handle') }}
             </UiLabel>
             <UiInput id="handle" v-model="handle" type="text" name="handle" :disabled="Boolean(profile)" required />
           </UiFormField>
 
           <UiFormField>
             <UiLabel for="avatar-url">
-              Avatar URL (optionnel)
+              {{ t('avatarUrl') }}
             </UiLabel>
             <UiInput id="avatar-url" v-model="avatarUrl" type="url" name="avatar-url" />
           </UiFormField>
 
           <UiFormField>
             <UiLabel for="key-fingerprint">
-              Key fingerprint (optionnel)
+              {{ t('keyFingerprint') }}
             </UiLabel>
             <UiInput id="key-fingerprint" v-model="keyFingerprint" type="text" name="key-fingerprint" />
           </UiFormField>
 
           <UiFormField>
             <UiLabel for="bio">
-              Bio (optionnel)
+              {{ t('bio') }}
             </UiLabel>
             <UiTextarea id="bio" v-model="bio" :rows="5" />
           </UiFormField>
 
           <UiButton type="submit">
-            {{ profile ? 'Mettre a jour le profil' : 'Creer le profil' }}
+            {{ profile ? t('updateAction') : t('createAction') }}
           </UiButton>
         </div>
       </UiCardContent>
@@ -133,3 +134,42 @@ onMounted(loadProfile)
     </p>
   </main>
 </template>
+
+<i18n lang="json">
+{
+  "fr": {
+    "title": "Profil",
+    "subtitleEdit": "Editez votre profil principal.",
+    "subtitleCreate": "Creez votre profil principal pour commencer.",
+    "displayName": "Nom affiche",
+    "handle": "Identifiant",
+    "avatarUrl": "Avatar URL (optionnel)",
+    "keyFingerprint": "Empreinte de cle (optionnel)",
+    "bio": "Bio (optionnel)",
+    "updateAction": "Mettre a jour le profil",
+    "createAction": "Creer le profil",
+    "messages": {
+      "created": "Profil cree.",
+      "updated": "Profil mis a jour.",
+      "failed": "Echec de la mise a jour du profil."
+    }
+  },
+  "en": {
+    "title": "Profile",
+    "subtitleEdit": "Edit your main profile.",
+    "subtitleCreate": "Create your main profile to get started.",
+    "displayName": "Display name",
+    "handle": "Handle",
+    "avatarUrl": "Avatar URL (optional)",
+    "keyFingerprint": "Key fingerprint (optional)",
+    "bio": "Bio (optional)",
+    "updateAction": "Update profile",
+    "createAction": "Create profile",
+    "messages": {
+      "created": "Profile created.",
+      "updated": "Profile updated.",
+      "failed": "Profile request failed."
+    }
+  }
+}
+</i18n>

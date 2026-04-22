@@ -26,6 +26,11 @@
 - Keep changes scoped: avoid mixing refactors with feature work in one commit.
 - Update `README.md` and `.env.example` when runtime behavior or env variables change.
 - For UI work in `apps/web-nuxt`, prefer extending components in `app/components/ui` before duplicating markup in pages.
+- For UI/content changes in `apps/web-nuxt`, keep localization complete:
+  - all user-facing strings must exist in both French and English,
+  - prefer local `<i18n>` blocks inside page components for page-specific copy,
+  - keep shared/global labels in `apps/web-nuxt/i18n.config.ts`,
+  - never hardcode user-visible text in templates or scripts when a translation key can be used.
 - Docker Compose environments:
   - `docker-compose.yml`: production-like runtime (`web` preview + `signer` + `postgres`).
   - `docker-compose.dev.yml`: development runtime (`nuxi dev` + `signer` + `postgres`).
@@ -38,6 +43,7 @@
 - In Rust, use typed errors (`thiserror`) for library code and contextual errors (`anyhow`) for binaries.
 - Write code comments in English and only when they add non-obvious context.
 - For Vue/Nuxt components, use `<script setup lang="ts">` and typed props/emits.
+- For Vue/Nuxt pages with user-visible copy, use `useI18n({ useScope: 'local' })` and key-based rendering (`t('...')`) instead of locale conditionals in code.
 - Use Reka UI primitives for accessibility-sensitive controls (labels, dialogs, menus, etc.).
 - Use UnoCSS utility classes instead of scoped CSS whenever practical.
 - Onboarding policy:

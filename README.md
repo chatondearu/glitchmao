@@ -130,7 +130,17 @@ docker compose down -v
 - Nuxt modules are declared in `apps/web-nuxt/nuxt.config.ts`:
   - `@unocss/nuxt`
   - `reka-ui/nuxt`
+  - `@nuxtjs/i18n`
 - UnoCSS presets are configured in `apps/web-nuxt/uno.config.ts`.
+
+### Localization policy (Nuxt i18n)
+
+- Locales supported in the web app: French (`fr`) and English (`en`).
+- Do not hardcode user-facing strings in components/pages.
+- Use key-based translations with `t('...')`.
+- Prefer local page-level translations with `<i18n lang="json">` for page-specific copy.
+- Keep shared/global navigation and cross-page labels in `apps/web-nuxt/i18n.config.ts`.
+- When adding or changing UI content, update both `fr` and `en` translations in the same change.
 
 ### Design token checklist (UnoCSS)
 
