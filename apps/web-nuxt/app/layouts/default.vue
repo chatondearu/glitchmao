@@ -22,7 +22,13 @@ const navItems = [
 const navLinkClass = 'flex h-9 items-center whitespace-nowrap rounded-sm px-3 text-label-caps transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container/60'
 
 function isNavItemActive(item: (typeof navItems)[number]) {
-  return route.path === item.to
+  if (item.to === '/')
+    return route.path === item.to
+
+  if (item.to === '/signatures')
+    return route.path === '/signatures'
+
+  return route.path.startsWith(item.to)
 }
 
 async function refreshAuth() {
@@ -73,6 +79,16 @@ async function applyLocale(nextLocale: 'fr' | 'en', syncProfile = true) {
   }).catch(() => {})
 }
 
+async function onLanguageSelect(value: string, close: () => void) {
+  await applyLocale(value as 'fr' | 'en')
+  close()
+}
+
+function onThemeSelect(close: () => void) {
+  toggleTheme()
+  close()
+}
+
 watch(locale, (value) => {
   language.value = value as 'fr' | 'en'
 })
@@ -99,14 +115,14 @@ onMounted(async () => {
         </NuxtLink>
         <div
           v-if="authState.authenticated"
-          class="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 md:justify-end md:gap-3"
+          class="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 md:w-auto md:flex-1 md:justify-end md:gap-3"
         >
           <nav
             v-if="(!onboardingRequired || route.path === '/onboarding')"
-            class="flex min-w-0 flex-wrap items-center justify-end"
+            class="flex w-full min-w-0 flex-wrap items-center justify-start md:w-auto md:justify-end"
             aria-label="Primary"
           >
-            <div class="flex items-center gap-0.5 rounded-sm border border-outline-variant bg-surface-container p-1">
+            <div class="flex w-full flex-wrap items-center gap-0.5 rounded-sm border border-outline-variant bg-surface-container p-1 md:w-auto">
               <NuxtLink
                 v-for="item in navItems"
                 :key="item.to"
@@ -155,7 +171,9 @@ onMounted(async () => {
               <div class="flex min-w-[min(100vw-2rem,17.5rem)] flex-col gap-1 px-2 py-1">
                 <NuxtLink
                   to="/settings/profile"
+                  :aria-current="route.path.startsWith('/settings') ? 'page' : undefined"
                   class="flex h-9 items-center rounded-sm px-2 text-left text-label-caps text-on-surface transition hover:bg-surface-container-high focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container/60"
+                  :class="route.path.startsWith('/settings') ? 'bg-primary-container text-on-primary hover:bg-primary-container' : undefined"
                   role="menuitem"
                   @click="close"
                 >
@@ -168,7 +186,7 @@ onMounted(async () => {
                   <UiSelect
                     :model-value="language"
                     class="h-9 w-full min-w-0"
-                    @update:model-value="(value) => applyLocale(value as 'fr' | 'en')"
+                    @update:model-value="(value) => onLanguageSelect(value, close)"
                   >
                     <option value="fr">FR</option>
                     <option value="en">EN</option>
@@ -179,7 +197,8 @@ onMounted(async () => {
                   variant="ghost"
                   size="sm"
                   class="h-9 w-full justify-start px-2 font-normal"
-                  @click="toggleTheme"
+                  role="menuitem"
+                  @click="onThemeSelect(close)"
                 >
                   {{ theme === 'dark' ? t('nav.themeLight') : t('nav.themeDark') }}
                 </UiButton>
@@ -189,6 +208,7 @@ onMounted(async () => {
                   variant="ghost"
                   size="sm"
                   class="h-9 w-full justify-start px-2 text-error hover:bg-error-container/15"
+                  role="menuitem"
                   @click="() => { close(); void logout() }"
                 >
                   {{ t('nav.logout') }}
