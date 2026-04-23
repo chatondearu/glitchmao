@@ -7,8 +7,9 @@ services:
     command: sh -lc "npm install --prefix apps/web-nuxt && npm run db:migrate:sql --prefix apps/web-nuxt && npm run build --prefix apps/web-nuxt && npm run preview --prefix apps/web-nuxt -- --host 0.0.0.0 --port 3000"
     ports:
       - "3000:3000"
+    restart: unless-stopped
     environment:
-      DATABASE_URL: ${DATABASE_URL_DOCKER:-postgresql://glitchmao:glitchmao@postgres:5432/glitchmao}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://glitchmao:glitchmao@postgres:5432/glitchmao}
       GPG_KEY_ID: ${GPG_KEY_ID:-test@glitchmao.local}
       SIGNER_SERVICE_URL: ${SIGNER_SERVICE_URL:-http://signer:4000}
       VERIFICATION_BASE_URL: ${VERIFICATION_BASE_URL:-http://localhost:3000/verify}
@@ -25,11 +26,16 @@ services:
       SIGNER_SECURITY_MODE: ${SIGNER_SECURITY_MODE:-secure}
       SIGNER_JWT_SECRET: ${SIGNER_JWT_SECRET:-change-me-in-env}
       SIGNER_JWT_TTL_SEC: ${SIGNER_JWT_TTL_SEC:-60}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/ > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
     depends_on:
       postgres:
         condition: service_healthy
       signer:
-        condition: service_started
+        condition: service_healthy
 
   signer:
     build:
@@ -37,6 +43,7 @@ services:
       dockerfile: infra/docker/Dockerfile.dev
     working_dir: /workspace
     command: sh -lc "mkdir -p /gnupg && chmod 700 /gnupg && cargo run --release -p signer-service"
+    restart: unless-stopped
     environment:
       GPG_KEY_ID: ${GPG_KEY_ID:-test@glitchmao.local}
       SIGNER_DEFAULT_KEY_ID: ${SIGNER_DEFAULT_KEY_ID:-test@glitchmao.local}
@@ -47,18 +54,21 @@ services:
       SIGNER_PORT: ${SIGNER_PORT:-4000}
       GNUPGHOME: ${GNUPGHOME_DOCKER:-/gnupg}
     volumes:
-      - .:/workspace
       - signer_prod_cargo_cache:/usr/local/cargo/registry
       - signer_prod_gpg_home:/gnupg
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4000/health > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   postgres:
     image: postgres:16
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-glitchmao}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-glitchmao}
       POSTGRES_DB: ${POSTGRES_DB:-glitchmao}
-    ports:
-      - "5432:5432"
     volumes:
       - pg_data_prod:/var/lib/postgresql/data
     healthcheck:

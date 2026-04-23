@@ -68,6 +68,16 @@ Services:
 - `web` runs `build + preview` mode
 - `signer` runs in release mode
 - `postgres` persists data in `pg_data_prod`
+- `web` and `signer` have healthchecks and `restart: unless-stopped` for container platforms
+
+### Coolify notes
+
+When deploying `docker-compose.yml` on Coolify:
+
+- set `VERIFICATION_BASE_URL` and `PASSWORD_RESET_BASE_URL` to your public app URL,
+- set a strong `SIGNER_JWT_SECRET`,
+- keep `SIGNER_SERVICE_URL=http://signer:4000` (service-to-service network),
+- do not expose `postgres` externally unless you need direct database access.
 
 ### Test stack
 

@@ -50,7 +50,6 @@ The repository exposes dedicated variables to avoid host/container URL confusion
 
 - `DATABASE_URL_DOCKER`
 - `DATABASE_URL_DOCKER_DEV`
-- `DATABASE_URL_DOCKER_PROD`
 - `DATABASE_URL_DOCKER_TEST`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
