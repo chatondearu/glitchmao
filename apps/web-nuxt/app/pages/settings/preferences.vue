@@ -105,17 +105,18 @@ onMounted(async () => {
       {{ t('subtitle') }}
     </p>
 
-    <UiCard v-if="!hasPassword" class="mt-5 border-primary-container bg-surface-container-high">
-      <UiCardContent>
-        <UiCardHeader>
-          <h3 class="text-body-lg font-semibold text-on-surface">
+    <UiCard v-if="!hasPassword" variant="primary" class="mt-5">
+      <template #header-left>
+        <div class="flex flex-col gap-1">
+          <h3 class="m-0 text-body-lg font-semibold">
             {{ t('legacyTitle') }}
           </h3>
-          <p class="text-body-md text-on-surface-variant">
+          <p class="m-0 text-body-md text-on-primary/85">
             {{ t('legacySubtitle') }}
           </p>
-        </UiCardHeader>
-        <div class="mt-3 grid gap-3">
+        </div>
+      </template>
+      <div class="grid gap-3">
           <UiInput v-model="email" type="email" name="legacy-email" placeholder="email" />
           <UiInput v-model="newPassword" type="password" name="legacy-password" :placeholder="t('newPasswordPlaceholder')" />
           <UiInput v-model="confirmPassword" type="password" name="legacy-password-confirm" :placeholder="t('confirmPasswordPlaceholder')" />
@@ -129,10 +130,9 @@ onMounted(async () => {
         <p v-if="authSuccess" class="ui-meta-mono mt-2 text-primary">
           {{ authSuccess }}
         </p>
-        <p v-if="authError" class="ui-meta-mono mt-2 text-error">
-          {{ authError }}
-        </p>
-      </UiCardContent>
+      <p v-if="authError" class="ui-meta-mono mt-2 text-error">
+        {{ authError }}
+      </p>
     </UiCard>
 
     <p v-if="error" class="ui-meta-mono mt-4 text-error">
@@ -145,8 +145,7 @@ onMounted(async () => {
         :key="key.id"
         as="article"
       >
-        <UiCardContent>
-          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p class="font-medium">
                 {{ key.fingerprint }}
@@ -189,7 +188,6 @@ onMounted(async () => {
               {{ t('reportCompromisedAction') }}
             </UiButton>
           </div>
-        </UiCardContent>
       </UiCard>
     </div>
   </section>

@@ -107,12 +107,24 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="ui-page min-h-screen flex flex-col">
-    <header class="border-b-2 border-outline-variant bg-surface-container-low">
-      <div class="ui-container flex flex-col gap-3 py-4 md:flex-row md:items-center md:justify-between md:gap-4">
-        <NuxtLink to="/" class="shrink-0 text-headline-md font-semibold text-on-surface">
-          GlitchMao
-        </NuxtLink>
+  <UiShell>
+    <template #header>
+      <UiTopbar>
+        <template #brand>
+          <NuxtLink
+            to="/"
+            class="font-tech text-xs font-bold uppercase tracking-[0.14em] text-primary-container md:text-sm"
+          >
+            GlitchMao
+          </NuxtLink>
+        </template>
+        <template #status>
+          <div class="hidden items-center gap-2 ui-meta-mono text-[11px] text-primary-container md:inline-flex">
+            <span class="inline-flex h-2 w-2 rounded-full bg-primary-container" />
+            <span>{{ t('topbar.secureLink') }}</span>
+          </div>
+        </template>
+        <template #content>
         <div
           v-if="authState.authenticated"
           class="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 md:w-auto md:flex-1 md:justify-end md:gap-3"
@@ -217,13 +229,13 @@ onMounted(async () => {
             </template>
           </UiFloatingDropdown>
         </div>
-      </div>
-    </header>
-    <main class="flex-1">
-      <slot />
-    </main>
-    <footer class="border-t-2 border-outline-variant bg-surface-container-low">
-      <div class="ui-container flex flex-wrap items-center justify-between gap-3 py-4">
+        </template>
+      </UiTopbar>
+    </template>
+    <slot />
+    <template #footer>
+      <footer class="border-t border-outline-variant bg-surface-container-lowest/95 backdrop-blur-sm">
+      <div class="ui-container flex min-h-12 flex-wrap items-center justify-between gap-3 py-2">
         <span class="ui-meta-mono text-xs text-on-surface-variant">
           {{ t('footer.usefulLinks') }}
         </span>
@@ -236,13 +248,17 @@ onMounted(async () => {
           </UiLink>
         </div>
       </div>
-    </footer>
-  </div>
+      </footer>
+    </template>
+  </UiShell>
 </template>
 
 <i18n lang="json">
 {
   "fr": {
+    "topbar": {
+      "secureLink": "Lien securise"
+    },
     "footer": {
       "usefulLinks": "Liens utiles",
       "github": "Depot GitHub",
@@ -265,6 +281,9 @@ onMounted(async () => {
     }
   },
   "en": {
+    "topbar": {
+      "secureLink": "Secure link"
+    },
     "footer": {
       "usefulLinks": "Useful links",
       "github": "GitHub repository",

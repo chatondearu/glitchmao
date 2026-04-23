@@ -123,9 +123,8 @@ onMounted(async () => {
       </div>
     </div>
 
-    <UiCard as="form" class="mt-5" @submit.prevent="applyFilters">
-      <UiCardContent>
-        <div class="grid gap-3 sm:grid-cols-5">
+    <UiCard as="form" variant="primary" class="mt-5" @submit.prevent="applyFilters">
+      <div class="grid gap-3 sm:grid-cols-5">
           <UiFormField>
             <UiLabel for="source-filter">
               Type
@@ -182,8 +181,7 @@ onMounted(async () => {
               {{ t('filter') }}
             </UiButton>
           </div>
-        </div>
-      </UiCardContent>
+      </div>
     </UiCard>
 
     <p v-if="loading" class="ui-meta-mono mt-4">

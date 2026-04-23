@@ -81,9 +81,8 @@ onMounted(loadProfile)
       {{ profile ? t('subtitleEdit') : t('subtitleCreate') }}
     </p>
 
-    <UiCard as="form" class="mt-6" @submit.prevent="saveProfile">
-      <UiCardContent>
-        <div class="grid gap-4">
+    <UiCard as="form" variant="primary" class="mt-6" @submit.prevent="saveProfile">
+      <div class="grid gap-4">
           <UiFormField>
             <UiLabel for="display-name">
               {{ t('displayName') }}
@@ -122,8 +121,7 @@ onMounted(loadProfile)
           <UiButton type="submit">
             {{ profile ? t('updateAction') : t('createAction') }}
           </UiButton>
-        </div>
-      </UiCardContent>
+      </div>
     </UiCard>
 
     <p v-if="success" class="ui-meta-mono mt-4 text-primary">
