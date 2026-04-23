@@ -15,6 +15,7 @@ FROM node:22-bookworm-slim AS web-prod
 
 WORKDIR /workspace
 
+COPY infra/db/migrations ./infra/db/migrations
 COPY --from=web-builder /workspace/apps/web-nuxt/package.json ./apps/web-nuxt/package.json
 COPY --from=web-builder /workspace/apps/web-nuxt/node_modules ./apps/web-nuxt/node_modules
 COPY --from=web-builder /workspace/apps/web-nuxt/.output ./apps/web-nuxt/.output
