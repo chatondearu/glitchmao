@@ -53,8 +53,15 @@ export default defineEventHandler(async (event) => {
       isDefault: true,
     }).returning({ id: gpgKeys.id, fingerprint: gpgKeys.fingerprint })
 
+    await db.update(users).set({
+      displayName: parsed.data.display_name,
+      updatedAt: new Date(),
+    }).where(eq(users.id, current.userId))
+
     await db.update(profiles).set({
       locale: parsed.data.locale ?? current.locale ?? 'fr',
+      bio: parsed.data.bio ?? null,
+      avatarUrl: parsed.data.avatar_url ?? null,
       keyFingerprint: createdKey.fingerprint,
       onboardingCompletedAt: new Date(),
       onboardingVersion: 'v1',
