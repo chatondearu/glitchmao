@@ -105,7 +105,7 @@ onMounted(async () => {
       {{ t('subtitle') }}
     </p>
 
-    <UiCard v-if="!hasPassword" variant="primary" class="mt-5">
+    <UiCard v-if="!hasPassword" variant="alert" class="mt-5">
       <template #header-left>
         <div class="flex flex-col gap-1">
           <h3 class="m-0 text-body-lg font-semibold">
@@ -144,6 +144,7 @@ onMounted(async () => {
         v-for="key in keys"
         :key="key.id"
         as="article"
+        variant="secondary"
       >
         <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>

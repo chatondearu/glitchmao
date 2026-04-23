@@ -3,7 +3,7 @@ import { computed, useSlots } from 'vue'
 
 interface Props {
   as?: 'div' | 'section' | 'article' | 'form'
-  variant?: 'default' | 'primary'
+  variant?: 'default' | 'primary' | 'secondary' | 'alert'
   headerLeft?: string
   headerRight?: string
 }
@@ -26,17 +26,32 @@ const hasHeader = computed(() => {
   )
 })
 
+const cardClass = computed(() => {
+  if (props.variant === 'primary')
+    return 'border-outline-variant bg-surface-container-low text-on-surface'
+  if (props.variant === 'secondary')
+    return 'border-secondary-container bg-surface-container text-on-surface'
+  if (props.variant === 'alert')
+    return 'border-error-container/60 bg-surface-container-low text-on-surface'
+  return 'border-outline-variant bg-surface-container-low text-on-surface'
+})
+
 const headerClass = computed(() => {
   if (props.variant === 'primary')
-    return 'bg-primary-container text-on-primary'
-  return 'bg-surface-container-low text-on-surface'
+    return 'border-outline-variant bg-primary-container text-on-primary'
+  if (props.variant === 'secondary')
+    return 'border-secondary-container bg-secondary-container text-on-secondary-container'
+  if (props.variant === 'alert')
+    return 'border-error-container/60 bg-error-container text-on-error-container'
+  return 'border-outline-variant bg-surface-container-low text-on-surface'
 })
 </script>
 
 <template>
   <component
     :is="props.as"
-    class="flex flex-col border border-outline-variant bg-surface-container-low text-on-surface"
+    class="flex flex-col border"
+    :class="cardClass"
   >
     <div
       v-if="hasHeader"

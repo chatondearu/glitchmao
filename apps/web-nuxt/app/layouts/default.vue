@@ -12,24 +12,16 @@ const authState = ref<{
   activeProfileLocale?: 'fr' | 'en' | null
 }>({ authenticated: false })
 const language = ref<'fr' | 'en'>(locale.value as 'fr' | 'en')
-// Primary nav: verify -> create -> list signatures
-const navItems = [
-  { to: '/', labelKey: 'nav.verify' },
-  { to: '/signatures/new', labelKey: 'nav.create' },
-  { to: '/signatures', labelKey: 'nav.signatures' },
-] as const
+const topbarNavItems = computed(() => {
+  if (!authState.value.authenticated || (onboardingRequired.value && route.path !== '/onboarding'))
+    return []
 
-const navLinkClass = 'flex h-9 items-center whitespace-nowrap rounded-sm px-3 text-label-caps transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container/60'
-
-function isNavItemActive(item: (typeof navItems)[number]) {
-  if (item.to === '/')
-    return route.path === item.to
-
-  if (item.to === '/signatures')
-    return route.path === '/signatures'
-
-  return route.path.startsWith(item.to)
-}
+  return [
+    { to: '/', label: t('nav.verify'), match: 'exact' as const },
+    { to: '/signatures/new', label: t('nav.create'), match: 'prefix' as const },
+    { to: '/signatures', label: t('nav.signatures'), match: 'exact' as const },
+  ]
+})
 
 async function refreshAuth() {
   authState.value = await $fetch('/api/auth/me').catch(() => ({ authenticated: false }))
@@ -109,52 +101,24 @@ onMounted(async () => {
 <template>
   <UiShell>
     <template #header>
-      <UiTopbar>
+      <UiTopbar :nav-items="topbarNavItems">
         <template #brand>
           <NuxtLink
             to="/"
-            class="font-tech text-xs font-bold uppercase tracking-[0.14em] text-primary-container md:text-sm"
+            class="font-tech text-xs font-black uppercase tracking-[0.14em] text-primary-container md:text-sm"
           >
             GlitchMao
           </NuxtLink>
         </template>
-        <template #status>
-          <div class="hidden items-center gap-2 ui-meta-mono text-[11px] text-primary-container md:inline-flex">
-            <span class="inline-flex h-2 w-2 rounded-full bg-primary-container" />
-            <span>{{ t('topbar.secureLink') }}</span>
-          </div>
-        </template>
-        <template #content>
+        <template #actions>
         <div
           v-if="authState.authenticated"
-          class="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 md:w-auto md:flex-1 md:justify-end md:gap-3"
+          class="flex min-w-0 items-center gap-2"
         >
-          <nav
-            v-if="(!onboardingRequired || route.path === '/onboarding')"
-            class="flex w-full min-w-0 flex-wrap items-center justify-start md:w-auto md:justify-end"
-            aria-label="Primary"
-          >
-            <div class="flex w-full flex-wrap items-center gap-0.5 rounded-sm border border-outline-variant bg-surface-container p-1 md:w-auto">
-              <NuxtLink
-                v-for="item in navItems"
-                :key="item.to"
-                :to="item.to"
-                :aria-current="isNavItemActive(item) ? 'page' : undefined"
-                :class="[
-                  navLinkClass,
-                  isNavItemActive(item)
-                    ? 'bg-primary-container text-on-primary'
-                    : 'text-on-surface hover:bg-surface-container-high',
-                ]"
-              >
-                {{ t(item.labelKey) }}
-              </NuxtLink>
-            </div>
-          </nav>
           <UiSelect
             v-if="profileOptions.length > 1"
             :model-value="authState.activeProfileId ?? ''"
-            class="h-9 w-auto min-w-[12rem] max-w-[min(100%,20rem)] shrink-0"
+            class="h-8 w-auto min-w-[10rem] max-w-[16rem] shrink-0 border-outline-variant bg-surface-container-lowest text-on-surface-variant"
             @update:model-value="onProfileSelect"
           >
             <option v-for="item in profileOptions" :key="item.profileId" :value="item.profileId">
@@ -167,7 +131,7 @@ onMounted(async () => {
                 type="button"
                 variant="ghost"
                 size="sm"
-                class="h-9 max-w-[min(100%,14rem)] shrink-0 gap-1 border border-outline-variant bg-surface-container px-3 hover:bg-surface-container-high"
+                class="h-8 max-w-[12rem] shrink-0 gap-1 border-outline-variant bg-surface-container-lowest px-2 text-on-surface-variant hover:border-primary-container/50 hover:bg-primary-container/10 hover:text-primary-container"
                 :aria-expanded="open"
                 aria-haspopup="menu"
                 :aria-label="t('userMenu.openMenuAria')"
@@ -256,9 +220,6 @@ onMounted(async () => {
 <i18n lang="json">
 {
   "fr": {
-    "topbar": {
-      "secureLink": "Lien securise"
-    },
     "footer": {
       "usefulLinks": "Liens utiles",
       "github": "Depot GitHub",
@@ -281,9 +242,6 @@ onMounted(async () => {
     }
   },
   "en": {
-    "topbar": {
-      "secureLink": "Secure link"
-    },
     "footer": {
       "usefulLinks": "Useful links",
       "github": "GitHub repository",

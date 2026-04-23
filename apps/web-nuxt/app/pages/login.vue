@@ -133,13 +133,13 @@ async function requestPasswordReset() {
       {{ error }}
     </p>
 
-    <UiCard v-if="mode === 'login'" variant="primary" class="mt-8">
+    <UiCard v-if="mode === 'login'" variant="secondary" class="mt-8">
       <template #header-left>
         <div class="flex flex-col gap-1">
           <p class="m-0 text-body-md font-semibold">
             {{ t('auth.forgotTitle') }}
           </p>
-          <p class="m-0 ui-meta-mono text-on-primary/85">
+          <p class="m-0 ui-meta-mono text-on-secondary-container/85">
             {{ t('auth.forgotHint') }}
           </p>
         </div>
