@@ -39,12 +39,16 @@ export default defineEventHandler(async (event) => {
       avatarUrl: parsed.data.avatar_url ?? null,
       keyFingerprint: parsed.data.key_fingerprint ?? null,
     }).returning({ id: profiles.id, locale: profiles.locale, bio: profiles.bio, avatarUrl: profiles.avatarUrl, keyFingerprint: profiles.keyFingerprint })
+    if (!createdProfile)
+      throw createError({ statusCode: 500, statusMessage: 'Unable to create profile' })
 
     const [currentUser] = await tx.select({
       id: users.id,
       handle: users.handle,
       displayName: users.displayName,
     }).from(users).where(eq(users.id, session.user.userId)).limit(1)
+    if (!currentUser)
+      throw createError({ statusCode: 404, statusMessage: 'User not found' })
 
     return {
       userId: currentUser.id,

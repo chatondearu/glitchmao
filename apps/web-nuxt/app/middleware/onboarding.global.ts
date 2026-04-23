@@ -3,7 +3,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
 
   const authResponse = await $fetch<{ authenticated: boolean }>('/api/auth/me').catch(() => ({ authenticated: false }))
-  const publicPaths = new Set(['/login', '/reset-password'])
+  const publicPaths = new Set(['/', '/verify', '/login', '/reset-password'])
   if (!authResponse.authenticated && !publicPaths.has(to.path))
     return navigateTo('/login')
 

@@ -37,6 +37,12 @@ export default defineEventHandler(async (event): Promise<VerificationResult> => 
   }
 
   const row = rows[0]
+  if (!row) {
+    return {
+      status: 'CORROMPU/INCONNU',
+      details: 'No known signature for the uploaded content',
+    }
+  }
   const signatureOk = await verifySignatureWithSigner(row.signature, row.contentHash)
   const status = signatureOk ? 'AUTHENTIQUE' : 'CORROMPU/INCONNU'
   const details = signatureOk ? 'Uploaded content matches a valid signature' : 'Stored signature is invalid'

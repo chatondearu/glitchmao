@@ -34,7 +34,7 @@ export interface AuthSessionProfile {
   avatarUrl: string | null
   keyFingerprint: string | null
   onboardingCompletedAt: Date | null
-  onboardingVersion: string
+  onboardingVersion: string | null
 }
 
 export interface AuthSessionContext {
@@ -54,6 +54,8 @@ export async function createAuthSession(event: H3Event, userId: string, profileI
     tokenHash: hashToken(token),
     expiresAt,
   }).returning({ id: authSessions.id })
+  if (!inserted)
+    throw createError({ statusCode: 500, statusMessage: 'Unable to create auth session' })
 
   setCookie(event, AUTH_SESSION_COOKIE, token, buildSessionCookieOptions(expiresAt))
 

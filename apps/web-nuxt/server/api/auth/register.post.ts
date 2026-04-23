@@ -32,6 +32,8 @@ export default defineEventHandler(async (event) => {
       email: parsed.data.email.toLowerCase(),
       displayName: parsed.data.display_name,
     }).returning({ id: users.id, handle: users.handle, displayName: users.displayName })
+    if (!user)
+      throw createError({ statusCode: 500, statusMessage: 'Unable to persist user record' })
 
     await tx.insert(authCredentials).values({
       userId: user.id,
@@ -41,6 +43,9 @@ export default defineEventHandler(async (event) => {
 
     return [user]
   })
+
+  if (!createdUser)
+    throw createError({ statusCode: 500, statusMessage: 'Unable to create user' })
 
   await createAuthSession(event, createdUser.id, null)
   return {
