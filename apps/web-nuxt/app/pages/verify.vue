@@ -26,17 +26,16 @@ onMounted(async () => {
 
 <template>
   <main class="ui-container max-w-3xl py-12">
-    <UiCard class="mt-6">
-      <UiCardContent>
-        <UiCardHeader>
-          <h1 class="text-headline-md font-semibold text-on-surface">
-            {{ t('title') }}
-          </h1>
-        </UiCardHeader>
-        <p class="mt-3 text-body-md text-on-surface-variant">
+    <UiCard variant="primary" class="mt-6">
+      <template #header-left>
+        <h1 class="m-0 text-headline-md font-semibold">
+          {{ t('title') }}
+        </h1>
+      </template>
+      <p class="text-body-md text-on-surface-variant">
           <strong>{{ t('signatureId') }}:</strong> {{ idFromUrl || 'N/A' }}
         </p>
-        <p class="mt-4 text-body-md text-on-surface-variant">
+        <p class="mt-3 text-body-md text-on-surface-variant">
           <strong>{{ t('hash') }}:</strong> {{ hashFromUrl || 'N/A' }}
         </p>
         <p v-if="result" class="ui-meta-mono mt-5" :class="result.status === 'AUTHENTIQUE' ? 'text-primary' : 'text-error'">
@@ -48,10 +47,9 @@ onMounted(async () => {
         <p v-else class="mt-5 text-body-md text-on-surface-variant">
           {{ t('helpPrefix') }}<code>?id=...</code>{{ t('helpMiddle') }}<code>?h=...</code>)
         </p>
-        <UiLink to="/" class="mt-8">
-          {{ t('back') }}
-        </UiLink>
-      </UiCardContent>
+      <UiLink to="/" class="mt-8">
+        {{ t('back') }}
+      </UiLink>
     </UiCard>
   </main>
 </template>

@@ -48,14 +48,13 @@ async function resetPassword() {
 
 <template>
   <main class="ui-container max-w-2xl py-10">
-    <UiCard as="form" class="mt-6" @submit.prevent="resetPassword">
-      <UiCardContent>
-        <UiCardHeader>
-          <h1 class="text-headline-md font-semibold">
-            {{ t('auth.resetTitle') }}
-          </h1>
-        </UiCardHeader>
-        <div class="mt-4 grid gap-4">
+    <UiCard as="form" variant="primary" class="mt-6" @submit.prevent="resetPassword">
+      <template #header-left>
+        <h1 class="m-0 text-headline-md font-semibold">
+          {{ t('auth.resetTitle') }}
+        </h1>
+      </template>
+      <div class="grid gap-4">
           <UiFormField>
             <UiLabel for="new-password">
               {{ t('auth.newPassword') }}
@@ -74,8 +73,7 @@ async function resetPassword() {
           <UiButton :disabled="loading" type="submit">
             {{ loading ? t('common.loading') : t('auth.resetAction') }}
           </UiButton>
-        </div>
-      </UiCardContent>
+      </div>
     </UiCard>
     <p v-if="success" class="ui-meta-mono mt-4 text-primary">
       {{ success }}

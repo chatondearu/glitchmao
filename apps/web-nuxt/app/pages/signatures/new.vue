@@ -78,9 +78,8 @@ async function copyVerificationLink() {
     <h1 class="text-headline-md font-semibold">
       {{ t('signatures.createTitle') }}
     </h1>
-    <UiCard as="form" class="mt-6" @submit.prevent="submitSignature">
-      <UiCardContent>
-        <div class="grid gap-4">
+    <UiCard as="form" variant="primary" class="mt-6" @submit.prevent="submitSignature">
+      <div class="grid gap-4">
           <UiFormField>
             <UiLabel for="source-type">
               {{ t('signatures.sourceType') }}
@@ -147,8 +146,7 @@ async function copyVerificationLink() {
           <UiButton type="submit" :disabled="loading">
             {{ loading ? t('signatures.creating') : t('signatures.saveAction') }}
           </UiButton>
-        </div>
-      </UiCardContent>
+      </div>
     </UiCard>
 
     <p

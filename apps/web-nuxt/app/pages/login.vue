@@ -70,18 +70,18 @@ async function requestPasswordReset() {
 
 <template>
   <main class="ui-container max-w-2xl py-10">
-    <UiCard as="form" class="mt-6" @submit.prevent="submit">
-      <UiCardContent>
-        <UiCardHeader>
-          <h1 class="text-headline-md font-semibold">
+    <UiCard as="form" variant="primary" class="mt-6" @submit.prevent="submit">
+      <template #header-left>
+        <div class="flex flex-col gap-1">
+          <h1 class="m-0 text-headline-md font-semibold">
             {{ mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle') }}
           </h1>
-          <p class="text-body-md text-on-surface-variant">
+          <p class="m-0 text-body-md text-on-primary/85">
             {{ t('auth.subtitle') }}
           </p>
-        </UiCardHeader>
-
-        <div class="mt-4 grid gap-4">
+        </div>
+      </template>
+      <div class="grid gap-4">
           <UiFormField>
             <UiLabel for="handle">
               {{ t('auth.handle') }}
@@ -116,8 +116,7 @@ async function requestPasswordReset() {
           <UiButton :disabled="loading" type="submit">
             {{ loading ? t('common.loading') : (mode === 'login' ? t('auth.login') : t('auth.register')) }}
           </UiButton>
-        </div>
-      </UiCardContent>
+      </div>
     </UiCard>
 
     <UiButton
@@ -134,26 +133,26 @@ async function requestPasswordReset() {
       {{ error }}
     </p>
 
-    <UiCard v-if="mode === 'login'" class="mt-8">
-      <UiCardContent>
-        <UiCardHeader>
-          <p class="text-body-md font-semibold text-on-surface">
+    <UiCard v-if="mode === 'login'" variant="primary" class="mt-8">
+      <template #header-left>
+        <div class="flex flex-col gap-1">
+          <p class="m-0 text-body-md font-semibold">
             {{ t('auth.forgotTitle') }}
           </p>
-          <p class="ui-meta-mono">
+          <p class="m-0 ui-meta-mono text-on-primary/85">
             {{ t('auth.forgotHint') }}
           </p>
-        </UiCardHeader>
-        <div class="mt-3 flex gap-2">
+        </div>
+      </template>
+      <div class="flex flex-col gap-2 sm:flex-row">
           <UiInput v-model="forgotIdentifier" type="text" name="forgot-identifier" :placeholder="t('auth.forgotPlaceholder')" />
           <UiButton type="button" variant="secondary" @click="requestPasswordReset">
             {{ t('common.send') }}
           </UiButton>
         </div>
-        <p v-if="forgotSuccess" class="ui-meta-mono mt-2 text-primary">
-          {{ forgotSuccess }}
-        </p>
-      </UiCardContent>
+      <p v-if="forgotSuccess" class="ui-meta-mono mt-2 text-primary">
+        {{ forgotSuccess }}
+      </p>
     </UiCard>
   </main>
 </template>

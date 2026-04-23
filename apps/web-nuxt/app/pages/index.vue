@@ -60,14 +60,13 @@ async function verifyByFile() {
 
 <template>
   <main class="ui-container max-w-3xl py-12">
-    <UiCard as="form" class="mt-6" @submit.prevent="verifyByHash">
-      <UiCardContent>
-        <UiCardHeader>
-          <h1 class="text-headline-md font-semibold text-on-surface">
-            {{ t('title') }}
-          </h1>
-        </UiCardHeader>
-        <div class="mt-4 grid gap-4">
+    <UiCard as="form" variant="primary" class="mt-6" @submit.prevent="verifyByHash">
+      <template #header-left>
+        <h1 class="m-0 text-headline-md font-semibold">
+          {{ t('title') }}
+        </h1>
+      </template>
+      <div class="grid gap-4">
           <UiFormField>
             <UiLabel for="hash-input">
               {{ t('hashLabel') }}
@@ -84,13 +83,11 @@ async function verifyByFile() {
           <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
             {{ loadingHash ? t('verifying') : t('verifyByHash') }}
           </UiButton>
-        </div>
-      </UiCardContent>
+      </div>
     </UiCard>
 
-    <UiCard as="form" class="mt-4" @submit.prevent="verifyByFile">
-      <UiCardContent>
-        <div class="grid gap-4">
+    <UiCard as="form" variant="primary" class="mt-4" @submit.prevent="verifyByFile">
+      <div class="grid gap-4">
           <UiFormField>
             <UiLabel for="file-input">
               {{ t('fileLabel') }}
@@ -104,8 +101,7 @@ async function verifyByFile() {
           <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
             {{ loadingFile ? t('verifying') : t('verifyByFile') }}
           </UiButton>
-        </div>
-      </UiCardContent>
+      </div>
     </UiCard>
 
     <p v-if="result" class="ui-meta-mono mt-5" :class="result.status === 'AUTHENTIQUE' ? 'text-primary' : 'text-error'">

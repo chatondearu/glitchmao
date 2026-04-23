@@ -74,9 +74,6 @@ export default defineConfig({
   shortcuts: {
     'ui-page': 'min-h-screen bg-background text-on-background font-sans',
     'ui-container': 'mx-auto w-full max-w-6xl px-container-padding sm:px-gutter lg:px-margin',
-    'ui-card': 'border border-outline-variant bg-surface-container text-on-surface',
-    'ui-card-header': 'border-b border-outline-variant bg-surface-container-high px-md py-sm',
-    'ui-card-content': 'px-md py-md',
     'ui-input-base': 'w-full border-0 border-b border-outline-variant bg-surface-container-lowest px-2 py-2 text-body-base text-on-surface outline-none transition focus-visible:border-primary-container focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-60',
     'ui-button-base': 'inline-flex items-center justify-center gap-2 border px-4 py-2 font-semibold uppercase tracking-[0.12em] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-container/60 disabled:cursor-not-allowed disabled:opacity-60',
     'ui-label-caps': 'text-label-caps text-on-surface-variant uppercase',
