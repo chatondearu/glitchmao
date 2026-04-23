@@ -35,6 +35,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
+      start_period: 120s
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,7 +54,7 @@ services:
       SIGNER_DEFAULT_KEY_ID: ${SIGNER_DEFAULT_KEY_ID:-test@glitchmao.local}
       SIGNER_SECURITY_MODE: ${SIGNER_SECURITY_MODE:-secure}
       SIGNER_INSECURE_BIND: ${SIGNER_INSECURE_BIND:-127.0.0.1}
-      SIGNER_JWT_SECRET: ${SIGNER_JWT_SECRET:-change-me-in-env}
+      SIGNER_JWT_SECRET: ${SIGNER_JWT_SECRET:-${SERVICE_PASSWORD_APP:-change-me-in-env}}
       SIGNER_HOST: ${SIGNER_HOST:-0.0.0.0}
       SIGNER_PORT: ${SIGNER_PORT:-4000}
       GNUPGHOME: ${GNUPGHOME_DOCKER:-/gnupg}
