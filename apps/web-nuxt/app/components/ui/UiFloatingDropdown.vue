@@ -21,6 +21,7 @@ defineSlots<{
 const open = ref(false)
 const referenceRef = ref<HTMLElement | null>(null)
 const floatingRef = ref<HTMLElement | null>(null)
+const lastFocusedElement = ref<HTMLElement | null>(null)
 
 const { floatingStyles } = useFloating(referenceRef, floatingRef, {
   open,
@@ -57,18 +58,31 @@ function onGlobalKeydown(event: KeyboardEvent) {
     close()
 }
 
+function focusFirstMenuItem() {
+  const firstFocusableItem = floatingRef.value?.querySelector<HTMLElement>(
+    '[role="menuitem"], button:not([disabled]), a[href], select, input, [tabindex]:not([tabindex="-1"])',
+  )
+  firstFocusableItem?.focus()
+}
+
 watch(open, (isOpen) => {
   if (!import.meta.client)
     return
   if (isOpen) {
+    lastFocusedElement.value = document.activeElement instanceof HTMLElement ? document.activeElement : null
     queueMicrotask(() => {
       document.addEventListener('pointerdown', onPointerDownOutside, true)
     })
     document.addEventListener('keydown', onGlobalKeydown)
+    queueMicrotask(() => {
+      focusFirstMenuItem()
+    })
   }
   else {
     document.removeEventListener('pointerdown', onPointerDownOutside, true)
     document.removeEventListener('keydown', onGlobalKeydown)
+    lastFocusedElement.value?.focus()
+    lastFocusedElement.value = null
   }
 })
 
