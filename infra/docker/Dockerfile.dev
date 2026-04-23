@@ -22,6 +22,7 @@ WORKDIR /workspace
 
 COPY package.json ./
 COPY apps/web-nuxt/package.json ./apps/web-nuxt/package.json
+COPY . .
 RUN corepack enable || true
 
 EXPOSE 3000
