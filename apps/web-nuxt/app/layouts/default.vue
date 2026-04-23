@@ -17,9 +17,9 @@ const topbarNavItems = computed(() => {
     return []
 
   return [
-    { to: '/', label: t('nav.verify'), match: 'exact' as const },
-    { to: '/signatures/new', label: t('nav.create'), match: 'prefix' as const },
-    { to: '/signatures', label: t('nav.signatures'), match: 'exact' as const },
+    { to: '/', label: t('nav.verify'), icon: 'i-mdi-shield-check-outline', match: 'exact' as const },
+    { to: '/signatures/new', label: t('nav.create'), icon: 'i-mdi-square-edit-outline', match: 'prefix' as const },
+    { to: '/signatures', label: t('nav.signatures'), icon: 'i-mdi-file-document-multiple-outline', match: 'exact' as const },
   ]
 })
 
