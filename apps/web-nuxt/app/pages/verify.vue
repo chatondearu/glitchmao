@@ -28,9 +28,7 @@ onMounted(async () => {
   <main class="ui-container max-w-3xl py-12">
     <UiCard variant="primary" class="mt-6">
       <template #header-left>
-        <h1 class="m-0 text-headline-md font-semibold">
-          {{ t('title') }}
-        </h1>
+        {{ t('title') }}
       </template>
       <p class="text-body-md text-on-surface-variant">
           <strong>{{ t('signatureId') }}:</strong> {{ idFromUrl || 'N/A' }}

@@ -55,7 +55,7 @@ const headerClass = computed(() => {
   >
     <div
       v-if="hasHeader"
-      class="flex items-center justify-between gap-3 border-b px-3 py-1"
+      class="flex items-center justify-between gap-3 border-b px-4 py-2"
       :class="headerClass"
     >
       <slot name="header">

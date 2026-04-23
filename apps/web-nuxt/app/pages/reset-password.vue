@@ -50,9 +50,7 @@ async function resetPassword() {
   <main class="ui-container max-w-2xl py-10">
     <UiCard as="form" variant="primary" class="mt-6" @submit.prevent="resetPassword">
       <template #header-left>
-        <h1 class="m-0 text-headline-md font-semibold">
-          {{ t('auth.resetTitle') }}
-        </h1>
+        {{ t('auth.resetTitle') }}
       </template>
       <div class="grid gap-4">
           <UiFormField>

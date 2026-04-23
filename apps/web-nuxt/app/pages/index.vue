@@ -62,27 +62,25 @@ async function verifyByFile() {
   <main class="ui-container max-w-3xl py-12">
     <UiCard as="form" variant="primary" class="mt-6" @submit.prevent="verifyByHash">
       <template #header-left>
-        <h1 class="m-0 text-headline-md font-semibold">
-          {{ t('title') }}
-        </h1>
+        {{ t('title') }}
       </template>
       <div class="grid gap-4">
-          <UiFormField>
-            <UiLabel for="hash-input">
-              {{ t('hashLabel') }}
-            </UiLabel>
-            <UiInput
-              id="hash-input"
-              v-model="hash"
-              type="text"
-              name="hash"
-              :placeholder="t('hashPlaceholder')"
-              required
-            />
-          </UiFormField>
-          <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
-            {{ loadingHash ? t('verifying') : t('verifyByHash') }}
-          </UiButton>
+        <UiFormField>
+          <UiLabel for="hash-input">
+            {{ t('hashLabel') }}
+          </UiLabel>
+          <UiInput
+            id="hash-input"
+            v-model="hash"
+            type="text"
+            name="hash"
+            :placeholder="t('hashPlaceholder')"
+            required
+          />
+        </UiFormField>
+        <UiButton type="submit" class="w-fit" :disabled="loadingHash || loadingFile">
+          {{ loadingHash ? t('verifying') : t('verifyByHash') }}
+        </UiButton>
       </div>
     </UiCard>
 
