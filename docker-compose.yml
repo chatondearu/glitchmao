@@ -9,10 +9,14 @@ services:
       - "3000:3000"
     restart: unless-stopped
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://glitchmao:glitchmao@postgres:5432/glitchmao}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${SERVICE_USER_POSTGRES:-glitchmao}:${SERVICE_PASSWORD_POSTGRES:-glitchmao}@postgres:5432/glitchmao}
+      COOLIFY_FQDN: ${COOLIFY_FQDN:-}
+      SERVICE_URL_WEB_3000: ${SERVICE_URL_WEB_3000:-}
+      SERVICE_PASSWORD_APP: ${SERVICE_PASSWORD_APP:-}
+      SERVICE_BASE64_APP: ${SERVICE_BASE64_APP:-}
       GPG_KEY_ID: ${GPG_KEY_ID:-test@glitchmao.local}
       SIGNER_SERVICE_URL: ${SIGNER_SERVICE_URL:-http://signer:4000}
-      VERIFICATION_BASE_URL: ${VERIFICATION_BASE_URL:-http://localhost:3000/verify}
+      VERIFICATION_BASE_URL: ${VERIFICATION_BASE_URL:-${SERVICE_URL_WEB:-https://${COOLIFY_FQDN:-localhost}}/verify}
       STORAGE_PROVIDER: ${STORAGE_PROVIDER:-none}
       STORAGE_BUCKET: ${STORAGE_BUCKET:-}
       STORAGE_BASE_URL: ${STORAGE_BASE_URL:-}
@@ -22,9 +26,9 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       SMTP_FROM: ${SMTP_FROM:-no-reply@glitchmao.local}
-      PASSWORD_RESET_BASE_URL: ${PASSWORD_RESET_BASE_URL:-http://localhost:3000/reset-password}
+      PASSWORD_RESET_BASE_URL: ${PASSWORD_RESET_BASE_URL:-${SERVICE_URL_WEB:-https://${COOLIFY_FQDN:-localhost}}/reset-password}
       SIGNER_SECURITY_MODE: ${SIGNER_SECURITY_MODE:-secure}
-      SIGNER_JWT_SECRET: ${SIGNER_JWT_SECRET:-change-me-in-env}
+      SIGNER_JWT_SECRET: ${SIGNER_JWT_SECRET:-${SERVICE_PASSWORD_APP:-change-me-in-env}}
       SIGNER_JWT_TTL_SEC: ${SIGNER_JWT_TTL_SEC:-60}
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/ > /dev/null || exit 1"]
@@ -66,9 +70,11 @@ services:
     image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-glitchmao}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-glitchmao}
+      POSTGRES_USER: ${POSTGRES_USER:-${SERVICE_USER_POSTGRES:-glitchmao}}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-${SERVICE_PASSWORD_POSTGRES:-glitchmao}}
       POSTGRES_DB: ${POSTGRES_DB:-glitchmao}
+      SERVICE_USER_POSTGRES: ${SERVICE_USER_POSTGRES:-}
+      SERVICE_PASSWORD_POSTGRES: ${SERVICE_PASSWORD_POSTGRES:-}
     volumes:
       - pg_data_prod:/var/lib/postgresql/data
     healthcheck:
