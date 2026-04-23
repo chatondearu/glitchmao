@@ -72,15 +72,11 @@ async function requestPasswordReset() {
   <main class="ui-container max-w-2xl py-10">
     <UiCard as="form" variant="primary" class="mt-6" @submit.prevent="submit">
       <template #header-left>
-        <div class="flex flex-col gap-1">
-          <h1 class="m-0 text-headline-md font-semibold">
-            {{ mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle') }}
-          </h1>
-          <p class="m-0 text-body-md text-on-primary/85">
-            {{ t('auth.subtitle') }}
-          </p>
-        </div>
+        {{ mode === 'login' ? t('auth.loginTitle') : t('auth.registerTitle') }}
       </template>
+      <p class="m-0 text-body-md text-on-primary/85">
+        {{ t('auth.subtitle') }}
+      </p>
       <div class="grid gap-4">
           <UiFormField>
             <UiLabel for="handle">
@@ -135,15 +131,11 @@ async function requestPasswordReset() {
 
     <UiCard v-if="mode === 'login'" variant="secondary" class="mt-8">
       <template #header-left>
-        <div class="flex flex-col gap-1">
-          <p class="m-0 text-body-md font-semibold">
-            {{ t('auth.forgotTitle') }}
-          </p>
-          <p class="m-0 ui-meta-mono text-on-secondary-container/85">
-            {{ t('auth.forgotHint') }}
-          </p>
-        </div>
+        {{ t('auth.forgotTitle') }}
       </template>
+      <p class="m-0 ui-meta-mono text-on-secondary-container/85">
+        {{ t('auth.forgotHint') }}
+      </p>
       <div class="flex flex-col gap-2 sm:flex-row">
           <UiInput v-model="forgotIdentifier" type="text" name="forgot-identifier" :placeholder="t('auth.forgotPlaceholder')" />
           <UiButton type="button" variant="secondary" @click="requestPasswordReset">
