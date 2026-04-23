@@ -12,8 +12,12 @@ interface GpgKeyItem {
 
 const keys = ref<GpgKeyItem[]>([])
 const error = ref('')
+const actionError = ref('')
 const authError = ref('')
 const authSuccess = ref('')
+const settingPassword = ref(false)
+const updatingDefaultKeyId = ref<string | null>(null)
+const updatingCompromisedKeyId = ref<string | null>(null)
 const hasPassword = ref(true)
 const email = ref('')
 const newPassword = ref('')
@@ -35,6 +39,7 @@ async function loadAuthState() {
 }
 
 async function configurePassword() {
+  settingPassword.value = true
   authError.value = ''
   authSuccess.value = ''
   if (newPassword.value !== confirmPassword.value) {
@@ -61,6 +66,9 @@ async function configurePassword() {
   catch (err) {
     authError.value = err instanceof Error ? err.message : t('errors.passwordSetupFailed')
   }
+  finally {
+    settingPassword.value = false
+  }
 }
 
 async function loadKeys() {
@@ -75,19 +83,39 @@ async function loadKeys() {
 }
 
 async function makeDefault(keyId: string) {
-  await $fetch('/api/settings/gpg-keys/default', { method: 'POST', body: { key_id: keyId } })
-  await loadKeys()
+  actionError.value = ''
+  updatingDefaultKeyId.value = keyId
+  try {
+    await $fetch('/api/settings/gpg-keys/default', { method: 'POST', body: { key_id: keyId } })
+    await loadKeys()
+  }
+  catch (err) {
+    actionError.value = err instanceof Error ? err.message : t('errors.updateDefaultFailed')
+  }
+  finally {
+    updatingDefaultKeyId.value = null
+  }
 }
 
 async function markCompromised(keyId: string) {
-  await $fetch(`/api/settings/gpg-keys/${keyId}/compromise`, {
-    method: 'POST',
-    body: {
-      reason: 'user_report',
-      note: compromiseNote.value[keyId] || undefined,
-    },
-  })
-  await loadKeys()
+  actionError.value = ''
+  updatingCompromisedKeyId.value = keyId
+  try {
+    await $fetch(`/api/settings/gpg-keys/${keyId}/compromise`, {
+      method: 'POST',
+      body: {
+        reason: 'user_report',
+        note: compromiseNote.value[keyId] || undefined,
+      },
+    })
+    await loadKeys()
+  }
+  catch (err) {
+    actionError.value = err instanceof Error ? err.message : t('errors.markCompromisedFailed')
+  }
+  finally {
+    updatingCompromisedKeyId.value = null
+  }
 }
 
 onMounted(async () => {
@@ -123,8 +151,8 @@ onMounted(async () => {
           <p class="ui-meta-mono">
             {{ t('passwordRuleLabel', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH }) }}
           </p>
-          <UiButton type="button" @click="configurePassword">
-            {{ t('setPasswordAction') }}
+          <UiButton type="button" :disabled="settingPassword" @click="configurePassword">
+            {{ settingPassword ? t('common.loading') : t('setPasswordAction') }}
           </UiButton>
         </div>
         <p v-if="authSuccess" class="ui-meta-mono mt-2 text-primary">
@@ -137,6 +165,9 @@ onMounted(async () => {
 
     <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
+    </p>
+    <p v-if="actionError" class="ui-meta-mono mt-4 text-error">
+      {{ actionError }}
     </p>
 
     <div class="mt-5 grid gap-4">
@@ -156,12 +187,12 @@ onMounted(async () => {
               </p>
             </div>
             <div class="flex items-center gap-2">
-              <span class="px-2 py-1 text-label-caps" :class="key.status === 'active' ? 'bg-primary-container text-on-primary' : 'bg-error-container text-on-error-container'">
+              <UiBadge :variant="key.status === 'active' ? 'success' : 'error'">
                 {{ key.status }}
-              </span>
-              <span v-if="key.isDefault" class="bg-surface-bright px-2 py-1 text-label-caps text-on-surface">
+              </UiBadge>
+              <UiBadge v-if="key.isDefault" variant="info">
                 default
-              </span>
+              </UiBadge>
             </div>
           </div>
 
@@ -175,18 +206,18 @@ onMounted(async () => {
             <UiButton
               type="button"
               variant="secondary"
-              :disabled="key.status !== 'active' || key.isDefault"
+              :disabled="key.status !== 'active' || key.isDefault || updatingCompromisedKeyId === key.id || updatingDefaultKeyId === key.id"
               @click="makeDefault(key.id)"
             >
-              {{ t('setDefaultAction') }}
+              {{ updatingDefaultKeyId === key.id ? t('common.loading') : t('setDefaultAction') }}
             </UiButton>
             <UiButton
               type="button"
               variant="ghost"
-              :disabled="key.status === 'compromised'"
+              :disabled="key.status === 'compromised' || updatingDefaultKeyId === key.id || updatingCompromisedKeyId === key.id"
               @click="markCompromised(key.id)"
             >
-              {{ t('reportCompromisedAction') }}
+              {{ updatingCompromisedKeyId === key.id ? t('common.loading') : t('reportCompromisedAction') }}
             </UiButton>
           </div>
       </UiCard>
@@ -197,6 +228,9 @@ onMounted(async () => {
 <i18n lang="json">
 {
   "fr": {
+    "common": {
+      "loading": "Chargement..."
+    },
     "title": "Parametres - Cles GPG",
     "subtitle": "Vous pouvez definir la cle active par defaut et signaler une cle compromise.",
     "legacyTitle": "Compte legacy - definir un mot de passe",
@@ -216,10 +250,15 @@ onMounted(async () => {
       "loadAuthState": "Impossible de charger l etat auth.",
       "passwordMismatch": "Les mots de passe ne correspondent pas.",
       "passwordSetupFailed": "Echec de configuration du mot de passe.",
-      "loadKeysFailed": "Impossible de charger les cles."
+      "loadKeysFailed": "Impossible de charger les cles.",
+      "updateDefaultFailed": "Impossible de definir la cle par defaut.",
+      "markCompromisedFailed": "Impossible de signaler la compromission."
     }
   },
   "en": {
+    "common": {
+      "loading": "Loading..."
+    },
     "title": "Settings - GPG keys",
     "subtitle": "Set the active default key and report compromised keys.",
     "legacyTitle": "Legacy account - set a password",
@@ -239,7 +278,9 @@ onMounted(async () => {
       "loadAuthState": "Failed to load auth state",
       "passwordMismatch": "Passwords do not match.",
       "passwordSetupFailed": "Password setup failed",
-      "loadKeysFailed": "Failed to load keys"
+      "loadKeysFailed": "Failed to load keys",
+      "updateDefaultFailed": "Failed to set default key",
+      "markCompromisedFailed": "Failed to mark key as compromised"
     }
   }
 }

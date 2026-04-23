@@ -53,6 +53,9 @@ export default defineEventHandler(async (event) => {
       isDefault: true,
     }).returning({ id: gpgKeys.id, fingerprint: gpgKeys.fingerprint })
 
+    if (!createdKey)
+      throw createError({ statusCode: 500, statusMessage: 'Unable to provision signing key' })
+
     await db.update(users).set({
       displayName: parsed.data.display_name,
       updatedAt: new Date(),
@@ -100,6 +103,8 @@ export default defineEventHandler(async (event) => {
       onboardingCompletedAt: new Date(),
       onboardingVersion: 'v1',
     }).returning({ id: profiles.id })
+    if (!createdProfile)
+      throw createError({ statusCode: 500, statusMessage: 'Unable to create profile during onboarding' })
 
     const [createdKey] = await tx.insert(gpgKeys).values({
       userId: session.user.userId,
@@ -109,6 +114,8 @@ export default defineEventHandler(async (event) => {
       status: 'active',
       isDefault: true,
     }).returning({ id: gpgKeys.id, fingerprint: gpgKeys.fingerprint })
+    if (!createdKey)
+      throw createError({ statusCode: 500, statusMessage: 'Unable to provision onboarding key' })
 
     return {
       userId: session.user.userId,

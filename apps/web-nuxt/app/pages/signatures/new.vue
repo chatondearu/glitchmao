@@ -39,7 +39,7 @@ async function submitSignature() {
   loading.value = true
   try {
     const contentHash = await computeHashFromSource()
-    result.value = await $fetch('/api/signatures', {
+    const created = await $fetch<{ id: string, status: 'stored' | 'already_exists', verification_url?: string }>('/api/signatures', {
       method: 'POST',
       body: {
         content_hash: contentHash,
@@ -49,7 +49,8 @@ async function submitSignature() {
         status: status.value,
       },
     })
-    verificationLink.value = result.value.verification_url || ''
+    result.value = created
+    verificationLink.value = created.verification_url || ''
   }
   catch (err) {
     error.value = err instanceof Error ? err.message : t('errors.signatureCreateFailed')

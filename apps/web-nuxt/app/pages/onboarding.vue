@@ -9,7 +9,7 @@ const avatarSet = ref<'set4' | 'set2' | 'set3'>('set4')
 const avatarSeedFallback = ref('new-user')
 
 const slides = computed(() => {
-  const rawSlides = tm('slides') as Array<{ title: unknown, text: unknown }>
+  const rawSlides = tm('slides') as Array<{ title: Parameters<typeof rt>[0], text: Parameters<typeof rt>[0] }>
   return rawSlides.map(slide => ({
     title: rt(slide.title),
     text: rt(slide.text),

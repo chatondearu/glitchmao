@@ -5,6 +5,7 @@ const token = computed(() => String(route.query.token ?? ''))
 const password = ref('')
 const confirmPassword = ref('')
 const loading = ref(false)
+const redirecting = ref(false)
 const error = ref('')
 const success = ref('')
 const PASSWORD_MIN_LENGTH = 8
@@ -36,6 +37,10 @@ async function resetPassword() {
       },
     })
     success.value = t('auth.resetSuccess')
+    redirecting.value = true
+    setTimeout(() => {
+      void navigateTo('/login')
+    }, 1800)
   }
   catch (err) {
     error.value = err instanceof Error ? err.message : t('errors.resetFailed')
@@ -76,6 +81,12 @@ async function resetPassword() {
     <p v-if="success" class="ui-meta-mono mt-4 text-primary">
       {{ success }}
     </p>
+    <p v-if="success && redirecting" class="ui-meta-mono mt-2 text-on-surface-variant">
+      {{ t('auth.redirecting') }}
+    </p>
+    <UiLink v-if="success" to="/login" class="mt-3 inline-flex">
+      {{ t('auth.backToLogin') }}
+    </UiLink>
     <p v-if="error" class="ui-meta-mono mt-4 text-error">
       {{ error }}
     </p>
@@ -92,6 +103,8 @@ async function resetPassword() {
       "passwordMismatch": "Les mots de passe ne correspondent pas.",
       "passwordHint": "Le mot de passe doit contenir entre {min} et {max} caracteres.",
       "resetSuccess": "Mot de passe reinitialise. Vous pouvez maintenant vous connecter.",
+      "redirecting": "Redirection vers la page de connexion...",
+      "backToLogin": "Retour a la connexion",
       "resetTitle": "Reinitialisation du mot de passe",
       "newPassword": "Nouveau mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
@@ -110,6 +123,8 @@ async function resetPassword() {
       "passwordMismatch": "Passwords do not match.",
       "passwordHint": "Password must contain between {min} and {max} characters.",
       "resetSuccess": "Password has been reset. You can now sign in.",
+      "redirecting": "Redirecting to sign in...",
+      "backToLogin": "Back to sign in",
       "resetTitle": "Password reset",
       "newPassword": "New password",
       "confirmPassword": "Confirm password",

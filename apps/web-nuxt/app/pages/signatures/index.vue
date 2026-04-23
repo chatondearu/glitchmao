@@ -125,11 +125,7 @@ onMounted(async () => {
 
     <UiCard as="form" variant="primary" class="mt-5" @submit.prevent="applyFilters">
       <div class="grid gap-3 sm:grid-cols-5">
-          <UiFormField>
-            <UiLabel for="source-filter">
-              Type
-              
-            </UiLabel>
+          <UiField id="source-filter" :label="t('type')">
             <UiSelect id="source-filter" v-model="sourceType">
               <option value="">
                 {{ t('all') }}
@@ -150,11 +146,8 @@ onMounted(async () => {
                 {{ t('plainText') }}
               </option>
             </UiSelect>
-          </UiFormField>
-          <UiFormField>
-            <UiLabel for="profile-filter">
-              {{ t('profile') }}
-            </UiLabel>
+          </UiField>
+          <UiField id="profile-filter" :label="t('profile')">
             <UiSelect id="profile-filter" v-model="profileId">
               <option value="">
                 {{ t('all') }}
@@ -163,19 +156,13 @@ onMounted(async () => {
                 {{ profile.displayName }} (@{{ profile.handle }})
               </option>
             </UiSelect>
-          </UiFormField>
-          <UiFormField>
-            <UiLabel for="from-filter">
-              {{ t('from') }}
-            </UiLabel>
+          </UiField>
+          <UiField id="from-filter" :label="t('from')">
             <UiInput id="from-filter" v-model="from" type="date" name="from-filter" />
-          </UiFormField>
-          <UiFormField>
-            <UiLabel for="to-filter">
-              {{ t('to') }}
-            </UiLabel>
+          </UiField>
+          <UiField id="to-filter" :label="t('to')">
             <UiInput id="to-filter" v-model="to" type="date" name="to-filter" />
-          </UiFormField>
+          </UiField>
           <div class="flex items-end">
             <UiButton type="submit" class="w-full">
               {{ t('filter') }}
@@ -194,8 +181,8 @@ onMounted(async () => {
       {{ copyError }}
     </p>
 
-    <UiCard v-if="!loading" variant="secondary" class="mt-4 overflow-x-auto">
-      <table class="min-w-full text-body-md">
+    <UiCard v-if="!loading && items.length" variant="secondary" class="mt-4">
+      <UiTable>
         <thead class="bg-surface-container-high text-left text-label-caps text-on-surface-variant">
           <tr>
             <th class="px-3 py-2">
@@ -217,6 +204,9 @@ onMounted(async () => {
             <th class="px-3 py-2">
               {{ t('hash') }}
             </th>
+            <th class="px-3 py-2">
+              {{ t('verifyLink') }}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -231,9 +221,9 @@ onMounted(async () => {
               {{ item.displayName ?? item.handle ?? item.creatorId }}
             </td>
             <td class="px-3 py-2">
-              <span :class="item.status === 'AUTHENTIQUE' ? 'text-primary' : 'text-error'">
+              <UiBadge :variant="item.status === 'AUTHENTIQUE' ? 'success' : 'error'">
                 {{ item.status }}
-              </span>
+              </UiBadge>
             </td>
             <td class="px-3 py-2 font-mono text-label-mono whitespace-nowrap">
               <div class="flex items-center gap-2">
@@ -255,15 +245,21 @@ onMounted(async () => {
             <td class="px-3 py-2 font-mono text-label-mono">
               {{ item.contentHash.slice(0, 16) }}...
             </td>
-          </tr>
-          <tr v-if="items.length === 0">
-            <td colspan="6" class="px-3 py-6 text-center text-on-surface-variant">
-              {{ t('empty') }}
+            <td class="px-3 py-2">
+              <UiLink :to="item.verificationUrl" external class="ui-meta-mono">
+                {{ t('openVerification') }}
+              </UiLink>
             </td>
           </tr>
         </tbody>
-      </table>
+      </UiTable>
     </UiCard>
+    <UiEmptyState
+      v-if="!loading && !items.length"
+      class="mt-4"
+      :title="t('empty')"
+      :description="t('emptyHint')"
+    />
     <div v-if="nextCursor" class="mt-4 flex justify-center">
       <UiButton type="button" variant="secondary" @click="fetchSignatures(true)">
         {{ t('loadMore') }}
@@ -289,10 +285,13 @@ onMounted(async () => {
     "status": "Statut",
     "publicId": "ID public",
     "hash": "Hash",
+    "verifyLink": "Lien verification",
+    "openVerification": "Ouvrir",
     "copy": "Copier",
     "copied": "Copie",
     "copyItem": "Copier {id}",
     "empty": "Aucune signature.",
+    "emptyHint": "Creez une nouvelle signature pour commencer.",
     "loadMore": "Charger plus",
     "errors": {
       "loadFailed": "Impossible de charger les signatures.",
@@ -314,10 +313,13 @@ onMounted(async () => {
     "status": "Status",
     "publicId": "Public ID",
     "hash": "Hash",
+    "verifyLink": "Verification link",
+    "openVerification": "Open",
     "copy": "Copy",
     "copied": "Copied",
     "copyItem": "Copy {id}",
     "empty": "No signatures.",
+    "emptyHint": "Create a new signature to get started.",
     "loadMore": "Load more",
     "errors": {
       "loadFailed": "Failed to load signatures.",

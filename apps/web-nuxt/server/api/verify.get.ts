@@ -70,6 +70,12 @@ export default defineEventHandler(async (event): Promise<VerificationResult> => 
   }
 
   const row = rows[0]
+  if (!row) {
+    return {
+      status: 'CORROMPU/INCONNU',
+      details: 'No signature record found for this hash',
+    }
+  }
   const signatureOk = await verifySignatureWithSigner(row.signature, row.contentHash)
 
   return signatureOk

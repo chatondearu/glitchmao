@@ -95,7 +95,9 @@ export default defineEventHandler(async (event) => {
   const generatedSignature = await signHashWithSigner(parsed.data.content_hash, signingContext.fingerprint, {
     bearerToken: signerToken,
   })
+  const timestampMs = Date.now()
   const baseValues = {
+    publicId: buildPublicId(parsed.data.content_hash, timestampMs),
     contentHash: parsed.data.content_hash,
     signature: generatedSignature,
     creatorId: parsed.data.creator_id ?? signingContext.handle ?? 'anonymous',
@@ -112,7 +114,6 @@ export default defineEventHandler(async (event) => {
   }
 
   let created: { id: string, publicId: string } | undefined
-  let timestampMs = Date.now()
   try {
     for (let attempt = 0; attempt < 5; attempt += 1) {
       const candidatePublicId = buildPublicId(parsed.data.content_hash, timestampMs + attempt)

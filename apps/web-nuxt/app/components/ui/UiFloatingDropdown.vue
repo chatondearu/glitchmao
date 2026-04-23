@@ -14,11 +14,12 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 defineSlots<{
-  trigger: (props: { open: boolean, toggle: () => void }) => unknown
+  trigger: (props: { open: boolean, toggle: () => void, menuId: string }) => unknown
   default: (props: { close: () => void }) => unknown
 }>()
 
 const open = ref(false)
+const menuId = `ui-floating-menu-${useId()}`
 const referenceRef = ref<HTMLElement | null>(null)
 const floatingRef = ref<HTMLElement | null>(null)
 const lastFocusedElement = ref<HTMLElement | null>(null)
@@ -54,8 +55,40 @@ function onPointerDownOutside(event: MouseEvent | PointerEvent) {
 }
 
 function onGlobalKeydown(event: KeyboardEvent) {
-  if (event.key === 'Escape')
+  if (event.key === 'Escape') {
     close()
+    return
+  }
+  if (!open.value || !floatingRef.value)
+    return
+
+  const focusableItems = Array.from(
+    floatingRef.value.querySelectorAll<HTMLElement>(
+      '[role="menuitem"], button:not([disabled]), a[href], select, input, [tabindex]:not([tabindex="-1"])',
+    ),
+  )
+  if (!focusableItems.length)
+    return
+
+  const focusedIndex = focusableItems.findIndex(item => item === document.activeElement)
+  if (event.key === 'ArrowDown') {
+    event.preventDefault()
+    const nextIndex = focusedIndex === -1 ? 0 : (focusedIndex + 1) % focusableItems.length
+    focusableItems[nextIndex]?.focus()
+  }
+  if (event.key === 'ArrowUp') {
+    event.preventDefault()
+    const prevIndex = focusedIndex <= 0 ? focusableItems.length - 1 : focusedIndex - 1
+    focusableItems[prevIndex]?.focus()
+  }
+  if (event.key === 'Home') {
+    event.preventDefault()
+    focusableItems[0]?.focus()
+  }
+  if (event.key === 'End') {
+    event.preventDefault()
+    focusableItems[focusableItems.length - 1]?.focus()
+  }
 }
 
 function focusFirstMenuItem() {
@@ -104,6 +137,7 @@ onBeforeUnmount(() => {
         name="trigger"
         :open="open"
         :toggle="toggle"
+        :menu-id="menuId"
       />
     </div>
     <Teleport to="body">
@@ -112,6 +146,7 @@ onBeforeUnmount(() => {
         ref="floatingRef"
         class="border-2 border-outline-variant bg-surface-container-low py-2 shadow-none outline-none"
         :style="{ ...floatingStyles, zIndex: props.zIndex }"
+        :id="menuId"
         role="menu"
       >
         <slot

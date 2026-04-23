@@ -4,13 +4,14 @@ const { locale, setLocale } = useI18n({ useScope: 'global' })
 const { t } = useI18n({ useScope: 'local' })
 const onboardingRequired = useState<boolean>('onboarding-required', () => false)
 const { theme, toggleTheme, hydrateTheme } = useTheme()
-const profileOptions = ref<Array<{ profileId: string, handle: string, displayName: string, locale: 'fr' | 'en' }>>([])
-const authState = ref<{
+interface AuthMeResponse {
   authenticated: boolean
   user?: { displayName: string }
   activeProfileId?: string | null
   activeProfileLocale?: 'fr' | 'en' | null
-}>({ authenticated: false })
+}
+const profileOptions = ref<Array<{ profileId: string, handle: string, displayName: string, locale: 'fr' | 'en' }>>([])
+const authState = ref<AuthMeResponse>({ authenticated: false })
 const language = ref<'fr' | 'en'>(locale.value as 'fr' | 'en')
 const topbarNavItems = computed(() => {
   if (!authState.value.authenticated || (onboardingRequired.value && route.path !== '/onboarding'))
@@ -24,7 +25,7 @@ const topbarNavItems = computed(() => {
 })
 
 async function refreshAuth() {
-  authState.value = await $fetch('/api/auth/me').catch(() => ({ authenticated: false }))
+  authState.value = await $fetch<AuthMeResponse>('/api/auth/me').catch(() => ({ authenticated: false }))
   if (!authState.value.authenticated) {
     profileOptions.value = []
     return
@@ -36,6 +37,24 @@ async function refreshAuth() {
     ?? response.items.find(item => item.profileId === authState.value.activeProfileId)?.locale
     ?? language.value) as 'fr' | 'en'
   await applyLocale(nextLocale, false)
+}
+
+async function refreshSessionState() {
+  try {
+    await refreshAuth()
+    if (!authState.value.authenticated) {
+      onboardingRequired.value = false
+      return
+    }
+
+    const response = await $fetch<{ onboardingRequired: boolean }>('/api/onboarding/state')
+    onboardingRequired.value = response.onboardingRequired
+  }
+  catch {
+    authState.value = { authenticated: false }
+    profileOptions.value = []
+    onboardingRequired.value = false
+  }
 }
 
 async function switchProfile(profileId: string) {
@@ -55,7 +74,10 @@ function onProfileSelect(value: string) {
 }
 
 async function logout() {
-  await $fetch('/api/auth/logout', { method: 'POST' })
+  await $fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
+  authState.value = { authenticated: false }
+  profileOptions.value = []
+  onboardingRequired.value = false
   await navigateTo('/login')
 }
 
@@ -85,21 +107,18 @@ watch(locale, (value) => {
   language.value = value as 'fr' | 'en'
 })
 
+watch(() => route.fullPath, () => {
+  void refreshSessionState()
+})
+
 onMounted(async () => {
   hydrateTheme()
-  try {
-    await refreshAuth()
-    const response = await $fetch<{ onboardingRequired: boolean }>('/api/onboarding/state')
-    onboardingRequired.value = response.onboardingRequired
-  }
-  catch {
-    onboardingRequired.value = true
-  }
+  await refreshSessionState()
 })
 </script>
 
 <template>
-  <UiShell>
+  <UiShell :reserve-bottom-inset="topbarNavItems.length > 0">
     <template #header>
       <UiTopbar :nav-items="topbarNavItems">
         <template #brand>
@@ -126,13 +145,14 @@ onMounted(async () => {
             </option>
           </UiSelect>
           <UiFloatingDropdown placement="bottom-end">
-            <template #trigger="{ open, toggle }">
+            <template #trigger="{ open, toggle, menuId }">
               <UiButton
                 type="button"
                 variant="ghost"
                 size="sm"
                 class="h-8 max-w-[12rem] shrink-0 gap-1 border-outline-variant bg-surface-container-lowest px-2 text-on-surface-variant hover:border-primary-container/50 hover:bg-primary-container/10 hover:text-primary-container"
                 :aria-expanded="open"
+                :aria-controls="open ? menuId : undefined"
                 aria-haspopup="menu"
                 :aria-label="t('userMenu.openMenuAria')"
                 @click="toggle"
