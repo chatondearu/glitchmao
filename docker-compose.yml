@@ -78,7 +78,7 @@ services:
     volumes:
       - pg_data_prod:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U glitchmao -d glitchmao"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-${SERVICE_USER_POSTGRES:-glitchmao}} -d ${POSTGRES_DB:-glitchmao}"]
       interval: 5s
       timeout: 5s
       retries: 10
