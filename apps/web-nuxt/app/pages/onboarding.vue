@@ -266,7 +266,7 @@ watch(generatedAvatarUrl, (value) => {
           </p>
         </UiCard>
 
-        <UiCard>
+        <UiCard variant="secondary">
           <div class="border border-outline-variant bg-surface-container-lowest p-3">
               <p class="ui-meta-mono text-[11px] text-on-surface-variant">
                 {{ t('shell.line1') }}

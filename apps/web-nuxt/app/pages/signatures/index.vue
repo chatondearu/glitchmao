@@ -194,7 +194,7 @@ onMounted(async () => {
       {{ copyError }}
     </p>
 
-    <UiCard v-if="!loading" class="mt-4 overflow-x-auto">
+    <UiCard v-if="!loading" variant="secondary" class="mt-4 overflow-x-auto">
       <table class="min-w-full text-body-md">
         <thead class="bg-surface-container-high text-left text-label-caps text-on-surface-variant">
           <tr>
