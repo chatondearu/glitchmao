@@ -2,9 +2,9 @@ services:
   web:
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.dev
-    working_dir: /workspace
-    command: sh -lc "npm install --prefix apps/web-nuxt && npm run db:migrate:sql --prefix apps/web-nuxt && npm run build --prefix apps/web-nuxt && npm run preview --prefix apps/web-nuxt -- --host 0.0.0.0 --port 3000"
+      dockerfile: infra/docker/Dockerfile.prod
+      target: web-prod
+    command: sh -lc "node apps/web-nuxt/scripts/run-migrations.mjs && npm run preview --prefix apps/web-nuxt -- --host 0.0.0.0 --port 3000"
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -44,9 +44,9 @@ services:
   signer:
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.dev
-    working_dir: /workspace
-    command: sh -lc "mkdir -p /gnupg && chmod 700 /gnupg && cargo run --release -p signer-service"
+      dockerfile: infra/docker/Dockerfile.prod
+      target: signer-prod
+    command: sh -lc "mkdir -p /gnupg && chmod 700 /gnupg && signer-service"
     restart: unless-stopped
     environment:
       GPG_KEY_ID: ${GPG_KEY_ID:-test@glitchmao.local}
@@ -58,7 +58,6 @@ services:
       SIGNER_PORT: ${SIGNER_PORT:-4000}
       GNUPGHOME: ${GNUPGHOME_DOCKER:-/gnupg}
     volumes:
-      - signer_prod_cargo_cache:/usr/local/cargo/registry
       - signer_prod_gpg_home:/gnupg
     healthcheck:
       test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4000/health > /dev/null || exit 1"]
@@ -85,5 +84,4 @@ services:
 
 volumes:
   pg_data_prod:
-  signer_prod_cargo_cache:
   signer_prod_gpg_home:
