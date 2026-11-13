@@ -13,12 +13,13 @@
 - UI primitives in Nuxt app: Reka UI (`reka-ui` + `reka-ui/nuxt` module).
 - Styling in Nuxt app: UnoCSS (`@unocss/nuxt` + `uno.config.ts`).
 - Database: PostgreSQL.
-- Development environment entrypoint: `nix develop`.
+- Development environment: Nix flake (`flake.nix`) kept for full shell; Mise (`mise.toml`) pins Node 22 and Rust for lighter toolchain use.
 
 ## Workflow
 
-- Run commands from within `nix develop` to ensure consistent tool versions.
-- For checks (`test`, `lint`, `build`, migrations), prefer `nix develop -c <command>` explicitly.
+- Prefer Mise for Node/Rust: `mise install`, then `mise exec -- <command>` (or activate Mise).
+- Nix flake remains for the full shell (gpg, exiftool, postgres, docker, etc.); use it when those tools are needed.
+- Avoid wrapping every command in `nix develop` / `nix eval`; use Mise first for language tools.
 - For Docker dev (`docker-compose.dev.yml`), keep `apps/web-nuxt/node_modules` in a named volume and run npm commands as the `node` user inside containers to avoid permission drift on the host.
 - SQL migration flow in Docker dev:
   - `web-migrations` service watches `infra/db/migrations/*.sql` and reapplies migrations automatically.
